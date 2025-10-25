@@ -1,0 +1,291 @@
+/* Reset y configuración base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom, #e8eef5 0%, #d5dce5 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Encabezado */
+.encabezado {
+    background-color: #e94444;
+    padding: 0 0 0 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 65px;
+    height: 65px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.imagen-logo-header {
+    height: 55px;
+    width: auto;
+    margin: 0 auto;
+    display: block;
+}
+
+.ubicacion {
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    gap: 5px;
+}
+
+.estado-usuario {
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    gap: 10px;
+}
+
+.indicador-estado {
+    width: 8px;
+    height: 8px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+}
+
+/* Contenedor principal */
+.contenedor-formulario {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* Modal del formulario */
+.modal-formulario {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 50px 60px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    position: relative;
+    max-width: 580px;
+    width: 100%;
+}
+
+.aparicion-gradual {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Botón cerrar */
+.boton-cerrar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 2px solid #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.boton-cerrar:hover {
+    background-color: #333;
+    color: white;
+}
+
+/* Título del formulario */
+.titulo-formulario {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 40px;
+    color: #e94444;
+    font-weight: bold;
+}
+
+/* Contenedor de mensajes */
+.contenedor-mensajes {
+    margin-bottom: 20px;
+    min-height: 30px;
+}
+
+.mensaje-error {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #c62828;
+    font-size: 14px;
+}
+
+.mensaje-exito {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #2e7d32;
+    font-size: 14px;
+}
+
+.error-autenticacion {
+    background-color: #ffcdd2;
+    color: #d32f2f;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #d32f2f;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Formulario */
+.formulario-login {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.grupo-formulario {
+    display: flex;
+    width: 100%;
+}
+
+/* Campos de entrada */
+.entrada-formulario {
+    padding: 15px 20px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #f8f8f8;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.entrada-formulario:focus {
+    outline: none;
+    border-color: #e94444;
+    background-color: white;
+}
+
+.entrada-login-valida {
+    border-color: #4CAF50 !important;
+    background-color: #f1f8e9 !important;
+}
+
+.entrada-login-invalida {
+    border-color: #f44336 !important;
+    background-color: #ffebee !important;
+}
+
+/* Checkbox para recordar sesión */
+.recordar-sesion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.recordar-sesion input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #e94444;
+}
+
+.recordar-sesion label {
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
+/* Botón de inicio de sesión */
+.boton-iniciar-sesion {
+    width: 100%;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    background-color: #e94444;
+    color: white;
+}
+
+.boton-iniciar-sesion:hover {
+    background-color: #d63838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(233, 68, 68, 0.3);
+}
+
+.boton-iniciar-sesion:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.boton-login-cargando {
+    opacity: 0.7;
+}
+
+/* Enlace de recuperación */
+.enlace-recuperacion {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.enlace-recuperacion a {
+    color: #666;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.enlace-recuperacion a:hover {
+    color: #e94444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-formulario {
+        padding: 40px 30px;
+        margin: 20px;
+    }
+
+    .titulo-formulario {
+        font-size: 24px;
+    }
+
+    .encabezado {
+        padding: 12px 20px;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .encabezado > div {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Simulator - Acceso Directo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Webhook Simulator</h1>
+        
+        <div class="info">
+            <h3><img src='Vistas/Cliente/imagenes/comprobar.png' class='icono-comprobar' style='height:18px;width:auto;vertical-align:middle;margin-right:3px;'> Configuración Actualizada</h3>
+            <p>Ahora puedes abrir el Webhook Simulator directamente desde el sistema de archivos sin necesidad del puerto 8000.</p>
+        </div>
+        
+        <a href="Vistas/Cliente/webhook_simulator.html" class="btn">
+            🔧 Abrir Webhook Simulator
+        </a>
+        
+        <a href="Vistas/Cliente/dashboardCliente.html" class="btn">
+            🏪 Dashboard Cliente
+        </a>
+        
+        <a href="Vistas/Establecimiento/dashboardEstablecimiento.html" class="btn">
+            🏢 Dashboard Establecimiento
+        </a>
+        
+        <div class="info">
+            <h3>📋 Instrucciones:</h3>
+            <ol style="text-align: left;">
+                <li>Asegúrate de que XAMPP esté ejecutándose (Apache y MySQL)</li>
+                <li>Haz doble clic en este archivo para abrirlo</li>
+                <li>Usa los botones para acceder a las diferentes herramientas</li>
+                <li>El webhook simulator ahora funciona sin puerto 8000</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

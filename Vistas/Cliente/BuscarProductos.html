@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuscarProductos - Snappy</title>
+    <link rel="stylesheet" href="css/buscarProductos.css">
+    <script>
+        // Implementación directa de las clases de búsqueda (sin módulos ES6)
+        
+        // Estrategia Concreta 1: Búsqueda por Nombre
+        class BusquedaPorNombre {
+            buscar(criterio, productos) {
+                const criterioBusqueda = criterio.toLowerCase().trim();
+                
+                if (!criterioBusqueda) {
+                    return [];
+                }
+
+                const resultados = productos.filter(producto => 
+                    producto.nombre.toLowerCase().includes(criterioBusqueda)
+                );
+
+                return resultados;
+            }
+
+            obtenerNombreEstrategia() {
+                return 'Búsqueda por Nombre';
+            }
+        }
+
+        // Estrategia Concreta 2: Búsqueda por Categoría
+        class BusquedaPorCategoria {
+            buscar(criterio, productos) {
+                const categoriaBusqueda = criterio.toLowerCase().trim();
+                
+                if (!categoriaBusqueda) {
+                    return [];
+                }
+
+                const resultados = productos.filter(producto => 
+                    producto.categoria && producto.categoria.toLowerCase().includes(categoriaBusqueda)
+                );
+
+                return resultados;
+            }
+
+            obtenerNombreEstrategia() {
+                return 'Búsqueda por Categoría';
+            }
+        }
+
+        // Estrategia Concreta 3: Búsqueda por Precio
+        class BusquedaPorPrecio {
+            buscar(criterio, productos) {
+                const precioBusqueda = parseFloat(criterio);
+                
+                if (isNaN(precioBusqueda) || precioBusqueda <= 0) {
+                    return [];
+                }
+
+                const resultados = productos.filter(producto => 
+                    producto.precio <= precioBusqueda
+                );
+
+                return resultados;
+            }
+
+            obtenerNombreEstrategia() {
+                return 'Búsqueda por Precio';
+            }
+        }
+
+        // Contexto (BuscadorProductos) - Cliente principal
+        class BuscadorProductos {
+            constructor(estrategiaInicial = null) {
+                this.estrategia = estrategiaInicial || new BusquedaPorNombre();
+                this.productos = [];
+            }
+
+            establecerEstrategia(estrategia) {
+                this.estrategia = estrategia;
+            }
+
+            ejecutarBusqueda(criterio) {
+                return this.estrategia.buscar(criterio, this.productos);
+            }
+
+            buscarPorNombre(nombre) {
+                this.establecerEstrategia(new BusquedaPorNombre());
+                return this.ejecutarBusqueda(nombre);
+            }
+
+            buscarPorCategoria(categoria) {
+                this.establecerEstrategia(new BusquedaPorCategoria());
+                return this.ejecutarBusqueda(categoria);
+            }
+
+            buscarPorPrecio(precio) {
+                this.establecerEstrategia(new BusquedaPorPrecio());
+                return this.ejecutarBusqueda(precio);
+            }
+
+            obtenerProductosDisponibles() {
+                return this.productos;
+            }
+
+            cargarProductos(productos) {
+                this.productos = productos;
+            }
+        }
+
+        // Hacer las clases disponibles globalmente
+        window.BuscadorProductos = BuscadorProductos;
+        window.BusquedaPorNombre = BusquedaPorNombre;
+        window.BusquedaPorCategoria = BusquedaPorCategoria;
+        window.BusquedaPorPrecio = BusquedaPorPrecio;
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <span class="menu"><img src="../imagenes/barra-menu.png" alt="Menu" class="icono-barra-menu"></span>
+            <img src="../imagenes/logo-snappy.png" alt="Logo" class="logo">
+            <span class="location"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> Popayán</span>
+            <div class="search">
+                <input id="bp-input" type="text" placeholder="Buscar productos...">
+                <button id="bp-btn"><img src="../imagenes/buscar.png" alt="Buscar" class="icono-buscar"></button>
+            </div>
+            <div class="controls">
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+                <div class="user">
+                    <span class="user-icon"><img src="../imagenes/usuario.png" alt="Usuario" class="icono-usuario"></span>
+                    <span class="user-text">Usuario</span>
+                </div>
+                <button class="logout-btn" title="Cerrar sesión" disabled>
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal para resultados de búsqueda -->
+    <div class="main-content">
+        
+        <!-- Los resultados de búsqueda aparecerán aquí -->
+        <div id="resultados-busqueda" class="resultados-container">
+            <div class="no-results">
+                <h2>Busca productos en tu ciudad</h2>
+                <p>Ingresa el nombre del producto que deseas encontrar</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let buscador;
+        let productos = [];
+
+        // Cargar productos desde la base de datos
+        async function cargarProductos() {
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/listar_productos.php?solo_activos=true');
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('Productos cargados:', data.productos);
+                    productos = data.productos;
+                    buscador.cargarProductos(data.productos);
+                } else {
+                    console.error('Error al cargar productos:', data.error);
+                }
+            } catch (error) {
+                console.error('Error en la petición:', error);
+            }
+        }
+
+        // Renderizar resultados de búsqueda
+        function renderResultados(resultados) {
+            const container = document.getElementById('resultados-busqueda');
+            
+            if (!resultados || resultados.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <h2>No se encontraron productos</h2>
+                        <p>Intenta con otros términos de búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = resultados.map(producto => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${producto.imagen || 'https://via.placeholder.com/200x150?text=Producto'}" alt="${producto.nombre}">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${producto.nombre}</h3>
+                        <p class="product-description">${producto.descripcion || 'Delicioso producto disponible'}</p>
+                        <div class="product-meta">
+                            <span class="product-price">$${parseInt(producto.precio).toLocaleString()}</span>
+                            <span class="product-tag">${producto.categoria}</span>
+                        </div>
+                        <div class="product-establishment">
+                            <span class="establishment-name">${producto.establecimiento_nombre || producto.establecimiento || 'Establecimiento'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // Función de búsqueda
+        function buscar() {
+            const termino = document.getElementById('bp-input').value.trim();
+            console.log('Buscando:', termino);
+            
+            if (!termino) {
+                // Si no hay término, mostrar todos los productos
+                renderResultados(productos);
+                return;
+            }
+            
+            const resultados = buscador.buscarPorNombre(termino);
+            console.log('Resultados encontrados:', resultados);
+            renderResultados(resultados);
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar buscador
+            buscador = new BuscadorProductos(new BusquedaPorNombre());
+            console.log('Buscador inicializado');
+            
+            // Cargar productos
+            cargarProductos();
+            
+            // Event listeners
+            document.getElementById('bp-btn').addEventListener('click', buscar);
+            document.getElementById('bp-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    buscar();
+                }
+            });
+
+            // Mostrar todos los productos al cargar
+            setTimeout(() => {
+                renderResultados(productos);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

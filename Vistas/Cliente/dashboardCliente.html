@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Cliente - Snappy</title>
+    <link rel="stylesheet" href="css/dashboardCliente.css">
+    <script type="module" src="../../js/SistemaIntegracion.js"></script>
+    <script src="../../patrones/CarritoCompras.js"></script>
+    <script>
+        // Implementación directa de las clases de búsqueda (sin módulos ES6)
+        
+        // Estrategia Concreta 1: Búsqueda por Nombre
+        class BusquedaPorNombre {
+            buscar(criterio, productos) {
+                const criterioBusqueda = criterio.toLowerCase().trim();
+                
+                if (!criterioBusqueda) {
+                    return [];
+                }
+
+                const resultados = productos.filter(producto => 
+                    producto.nombre.toLowerCase().includes(criterioBusqueda)
+                );
+
+                return resultados;
+            }
+
+            obtenerNombreEstrategia() {
+                return 'Búsqueda por Nombre';
+            }
+        }
+
+        // Estrategia Concreta 2: Búsqueda por Categoría
+        class BusquedaPorCategoria {
+            buscar(criterio, productos) {
+                const categoriaBusqueda = criterio.toLowerCase().trim();
+                
+                if (!categoriaBusqueda) {
+                    return [];
+                }
+
+                const resultados = productos.filter(producto => 
+                    producto.categoria && producto.categoria.toLowerCase().includes(categoriaBusqueda)
+                );
+
+                return resultados;
+            }
+
+            obtenerNombreEstrategia() {
+                return 'Búsqueda por Categoría';
+            }
+        }
+
+        // Estrategia Concreta 3: Búsqueda por Precio
+        class BusquedaPorPrecio {
+            buscar(criterio, productos) {
+                console.log('=== ESTRATEGIA BUSQUEDA POR PRECIO ===');
+                console.log('Criterio recibido:', criterio);
+                console.log('Productos recibidos:', productos.length);
+                console.log('Productos:', productos);
+                
+                const rangos = criterio.split('-');
+                console.log('Rangos split:', rangos);
+                
+                if (rangos.length !== 2) {
+                    console.log('Error: No se pudo dividir el criterio correctamente');
+                    return [];
+                }
+
+                const [precioMinStr, precioMaxStr] = rangos;
+                const precioMin = parseFloat(precioMinStr.trim());
+                const precioMax = parseFloat(precioMaxStr.trim());
+                
+                console.log('Precio Min parseado:', precioMin);
+                console.log('Precio Max parseado:', precioMax);
+
+                if (isNaN(precioMin) || isNaN(precioMax) || precioMin > precioMax) {
+                    console.log('Error: Precios inválidos o min > max');
+                    return [];
+                }
+
+                const resultados = productos.filter(producto => {
+                    const precio = parseFloat(producto.precio);
+                    const cumple = precio >= precioMin && precio <= precioMax;
+                    console.log(`Producto: ${producto.nombre}, Precio: ${precio}, Cumple: ${cumple}`);
+                    return cumple;
+                });
+
+                console.log('Resultados finales:', resultados);
+                console.log('=== FIN ESTRATEGIA BUSQUEDA POR PRECIO ===');
+                return resultados;
+            }
+
+            obtenerNombreEstrategia() {
+                return 'Búsqueda por Precio';
+            }
+        }
+
+        // Context - Clase que utiliza las estrategias
+        class BuscadorProductos {
+            constructor(estrategia) {
+                this.estrategia = estrategia || new BusquedaPorNombre();
+                this.productos = [];
+            }
+
+            establecerEstrategia(estrategia) {
+                this.estrategia = estrategia;
+            }
+
+            cargarProductos(productos) {
+                this.productos = productos;
+            }
+
+            ejecutarBusqueda(criterio) {
+                if (!this.estrategia || this.productos.length === 0) {
+                    return [];
+                }
+                
+                return this.estrategia.buscar(criterio, this.productos);
+            }
+
+            buscarPorNombre(nombre) {
+                this.establecerEstrategia(new BusquedaPorNombre());
+                return this.ejecutarBusqueda(nombre);
+            }
+
+            buscarPorCategoria(categoria) {
+                this.establecerEstrategia(new BusquedaPorCategoria());
+                return this.ejecutarBusqueda(categoria);
+            }
+
+            buscarPorPrecio(precioMin, precioMax) {
+                console.log('=== BUSCAR POR PRECIO ===');
+                console.log('Precio Min:', precioMin, 'Tipo:', typeof precioMin);
+                console.log('Precio Max:', precioMax, 'Tipo:', typeof precioMax);
+                console.log('Criterio generado:', `${precioMin}-${precioMax}`);
+                
+                this.establecerEstrategia(new BusquedaPorPrecio());
+                const resultados = this.ejecutarBusqueda(`${precioMin}-${precioMax}`);
+                
+                console.log('Resultados de búsqueda por precio:', resultados);
+                console.log('=== FIN BUSCAR POR PRECIO ===');
+                return resultados;
+            }
+
+            obtenerEstrategiaActual() {
+                return this.estrategia.obtenerNombreEstrategia();
+            }
+
+            obtenerCantidadProductos() {
+                return this.productos.length;
+            }
+
+            obtenerProductosDisponibles() {
+                return this.productos;
+            }
+        }
+
+        // Hacer disponible globalmente
+        window.BuscadorProductos = BuscadorProductos;
+        window.BusquedaPorNombre = BusquedaPorNombre;
+        window.BusquedaPorCategoria = BusquedaPorCategoria;
+        window.BusquedaPorPrecio = BusquedaPorPrecio;
+        
+        console.log('Clases de búsqueda cargadas directamente:', {
+            BuscadorProductos: !!window.BuscadorProductos,
+            BusquedaPorNombre: !!window.BusquedaPorNombre
+        });
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <span class="menu"><img src="../imagenes/barra-menu.png" alt="Menu" class="icono-barra-menu"></span>
+            <img src="../imagenes/logo-snappy.png" alt="Logo" class="logo">
+            <span class="location">Popayán</span>
+
+            <div class="search">
+                <input id="entrada-busqueda" type="text" placeholder="Buscar productos...">
+                <button id="boton-buscar"><img src="../imagenes/buscar.png" alt="Buscar" class="icono-buscar"></button>
+            </div>
+
+            <div class="controls">
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+                <div class="cart" id="cart-toggle" title="Ver carrito" style="cursor: pointer; position: relative; margin-right: 12px;">
+                    🛒
+                    <span id="cart-badge" style="position:absolute; top:-6px; right:-10px; background:#ff3b30; color:#fff; border-radius:10px; padding:1px 6px; font-size:12px; min-width: 18px; text-align:center;">0</span>
+                </div>
+                <div class="user">
+                    <span class="user-icon"><img src="../imagenes/usuario.png" alt="Usuario" class="icono-usuario"></span>
+                    <span class="user-text" id="user-name">Usuario</span>
+                </div>
+                <button class="logout-btn" onclick="cerrarSesion()" title="Cerrar sesión">
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="hero">
+            <div class="hero-image">
+                <img src="../imagenes/mujer-laptop.png" alt="Cliente">
+            </div>
+        </div>
+        <div class="restaurants-grid" id="establecimientos-grid">
+            <!-- Grid clásico original -->
+        </div>
+
+        <!-- Brands Section -->
+        <div class="brands">
+            <img src="../imagenes/cafe-cauca.png" alt="Café Cauca">
+            <img src="../imagenes/cruz-verde.png" alt="Cruz Verde">
+            <img src="../imagenes/dominos.png" alt="Domino's">
+            <img src="../imagenes/juan-valdez.png" alt="Juan Valdez">
+            <img src="../imagenes/la-rebaja.png" alt="La Rebaja">
+            <img src="../imagenes/mario.png" alt="Mario's">
+            <img src="../imagenes/popsy.png" alt="Popsy">
+            <img src="../imagenes/velez.png" alt="Vélez">
+            <img src="../imagenes/ishop.png" alt="iShop">
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content" id="dashboard-content">
+            
+            <!-- Content will be loaded here when user selects options -->
+        </div>
+        
+    </div>
+
+    <!-- Panel lateral del carrito -->
+    <aside id="cart-panel" style="position: fixed; top: 0; right: -360px; width: 340px; height: 100vh; background: #fff; box-shadow: -2px 0 12px rgba(0,0,0,0.15); transition: right 0.3s ease; z-index: 1000; display: flex; flex-direction: column;">
+        <div style="padding: 16px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content: space-between;">
+            <strong>Tu carrito</strong>
+            <button id="cart-close" style="background:#ff3b30; color:#fff; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer;">✕</button>
+        </div>
+        <div id="cart-items" style="flex:1; overflow:auto; padding: 12px;"></div>
+        <div style="padding: 16px; border-top: 1px solid #eee;">
+            <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Total:</span>
+                <strong id="cart-total">$0</strong>
+            </div>
+            <button id="cart-checkout" style="width:100%; background:#0a7cff; color:#fff; border:none; border-radius:8px; padding:10px; cursor:pointer;">Proceder al pago</button>
+        </div>
+    </aside>
+
+    <script>
+        // Variables globales para el buscador
+        let buscador;
+        let contenedorDashboard;
+        let heroSection;
+        let productosActuales = []; // Almacenar productos actuales para filtros
+        let productosOriginales = []; // Almacenar productos originales de la búsqueda
+
+        // Cargar productos desde la base de datos
+        async function cargarProductos() {
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/listar_productos.php?solo_activos=true');
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('=== CARGA DE PRODUCTOS ===');
+                    console.log('Productos cargados desde BD:', data.data.length);
+                    console.log('Productos completos:', data.data);
+                    buscador.cargarProductos(data.data);
+                    console.log('Productos cargados en buscador:', buscador.obtenerProductosDisponibles().length);
+                    console.log('=== FIN CARGA DE PRODUCTOS ===');
+                } else {
+                    console.error('Error al cargar productos:', data.error);
+                    // Sin productos demo
+                    buscador.cargarProductos([]);
+                }
+            } catch (error) {
+                console.error('Error al conectar con la base de datos:', error);
+                // Sin productos demo
+                buscador.cargarProductos([]);
+            }
+        }
+
+        // Función para mostrar productos de un establecimiento específico
+        async function mostrarProductosEstablecimiento(establecimientoId, nombreEstablecimiento) {
+            try {
+                const response = await fetch(`http://localhost/SnappyVistas/database/listar_productos.php?establecimiento_id=${establecimientoId}&solo_activos=true`);
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    const contenedorDashboard = document.getElementById('dashboard-content');
+                    const heroSection = document.querySelector('.hero');
+                    
+                    // Ocultar hero section
+                    if (heroSection) {
+                        heroSection.style.display = 'none';
+                    }
+                    document.body.style.overflow = 'auto';
+                    
+                    // Mostrar productos del establecimiento
+                    const productos = data.data.slice(0, 6); // Mostrar máximo 6 productos
+                    const htmlProductos = productos.map(p => `
+                        <div class="product-card" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio}" data-categoria="${p.categoria || ''}" data-establecimiento-id="${establecimientoId}">
+                            <div class="product-card__info">
+                                <div class="product-card__name">${p.nombre}</div>
+                                <div class="product-card__description">${p.descripcion || ''}</div>
+                                <div class="product-card__meta">
+                                    <span class="product-card__price">$${p.precio}</span>
+                                    <span class="product-card__tag">${p.categoria}</span>
+                                </div>
+                            </div>
+                            <div class="product-card__actions">
+                                <button class="product-card__add" title="Agregar al carrito">Agregar</button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    contenedorDashboard.classList.add('content--results');
+                    document.body.classList.add('showing-results');
+                    contenedorDashboard.innerHTML = `
+                        <div class="exit-button-container">
+                            <button class="exit-button" onclick="clearDashboard()">✕</button>
+                        </div>
+                        <div class="results-header">
+                            <span class="results-title">${nombreEstablecimiento} - Productos</span>
+                        </div>
+                        <div class="results-container">${htmlProductos}</div>
+                    `;
+                    // Activar manejadores del carrito
+                    activarBotonesAgregar();
+                } else {
+                    alert('No se encontraron productos para este establecimiento');
+                }
+            } catch (error) {
+                console.error('Error al cargar productos del establecimiento:', error);
+                alert('Error al cargar los productos del establecimiento');
+            }
+        }
+
+        // Función para cargar establecimientos con estados de disponibilidad
+        async function cargarEstablecimientos() {
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/establecimientos_disponibilidad.php');
+                const data = await response.json();
+                
+                const grid = document.getElementById('establecimientos-grid');
+                if (!grid) return;
+                
+                if (data.success && data.data.length > 0) {
+                    const html = data.data.slice(0, 2).map(est => {
+                        const isDisponible = est.estado_disponibilidad === 'disponible';
+                        const cardClass = isDisponible ? 'restaurant-card available' : 'restaurant-card unavailable';
+                        const clickHandler = isDisponible ? `onclick="mostrarProductosEstablecimiento(${est.id}, '${est.nombre}')"` : '';
+                        
+                        return `
+                            <div class="${cardClass}" ${clickHandler}>
+                                <div class="restaurant-info">
+                                    <h3>${est.nombre}</h3>
+                                    <p style="font-size: 12px; color: #666; margin-top: 4px;">
+                                        ${est.estado_texto}
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    grid.innerHTML = html;
+                } else {
+                    // Sin establecimientos
+                    grid.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay establecimientos registrados en este momento</p>';
+                }
+            } catch (error) {
+                console.error('Error al cargar establecimientos:', error);
+                const grid = document.getElementById('establecimientos-grid');
+                if (grid) {
+                    grid.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Error al cargar establecimientos</p>';
+                }
+            }
+        }
+
+        // Función para aplicar filtro de categoría usando Strategy Pattern
+        function aplicarFiltro(categoria) {
+            console.log('Aplicando filtro de categoría:', categoria);
+            
+            // Limpiar filtros de precio cuando se cambia de categoría
+            const precioMinInput = document.getElementById('precio-min');
+            const precioMaxInput = document.getElementById('precio-max');
+            if (precioMinInput) precioMinInput.value = '';
+            if (precioMaxInput) precioMaxInput.value = '';
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${categoria}"]`).classList.add('active');
+            
+            let resultadosFiltrados = [];
+            
+            if (categoria === 'all') {
+                // Mostrar los productos originales de la búsqueda o todos si no hay búsqueda
+                if (productosOriginales.length > 0) {
+                    resultadosFiltrados = productosOriginales;
+                    console.log('Mostrando productos originales de la búsqueda:', resultadosFiltrados.length);
+                } else {
+                    resultadosFiltrados = buscador.obtenerProductosDisponibles();
+                    console.log('Mostrando todos los productos:', resultadosFiltrados.length);
+                }
+            } else {
+                // Usar Strategy Pattern para filtrar por categoría desde los productos originales
+                const productosBase = productosOriginales.length > 0 ? productosOriginales : buscador.obtenerProductosDisponibles();
+                buscador.cargarProductos(productosBase);
+                resultadosFiltrados = buscador.buscarPorCategoria(categoria);
+                console.log('Filtrando por categoría:', categoria, 'Resultados:', resultadosFiltrados.length);
+            }
+            
+            console.log('Resultados filtrados por categoría:', resultadosFiltrados);
+            renderResultados(resultadosFiltrados);
+        }
+        
+        // Función para aplicar filtro de precio usando Strategy Pattern
+        function aplicarFiltroPrecio() {
+            const precioMin = document.getElementById('precio-min').value;
+            const precioMax = document.getElementById('precio-max').value;
+            
+            console.log('Aplicando filtro de precio:', precioMin, '-', precioMax);
+            
+            if (!precioMin || !precioMax) {
+                alert('Por favor ingresa ambos valores de precio');
+                return;
+            }
+            
+            // Obtener la categoría actualmente seleccionada
+            const categoriaActiva = document.querySelector('.filter-btn.active');
+            const categoriaActual = categoriaActiva ? categoriaActiva.getAttribute('data-filter') : 'all';
+            
+            console.log('Categoría actual:', categoriaActual);
+            
+            // Primero filtrar por categoría si no es "all"
+            let productosBase = [];
+            if (categoriaActual === 'all') {
+                productosBase = productosOriginales.length > 0 ? productosOriginales : buscador.obtenerProductosDisponibles();
+            } else {
+                const productosBaseCompleto = productosOriginales.length > 0 ? productosOriginales : buscador.obtenerProductosDisponibles();
+                buscador.cargarProductos(productosBaseCompleto);
+                productosBase = buscador.buscarPorCategoria(categoriaActual);
+            }
+            
+            console.log('Productos base para filtrar por precio:', productosBase.length);
+            
+            // Luego filtrar por precio dentro de esos productos
+            buscador.cargarProductos(productosBase);
+            console.log('Productos cargados en buscador para filtrar por precio:', productosBase.length);
+            console.log('Productos base:', productosBase);
+            
+            const resultadosFiltrados = buscador.buscarPorPrecio(parseFloat(precioMin), parseFloat(precioMax));
+            
+            console.log('Resultados filtrados por precio:', resultadosFiltrados);
+            console.log('Cantidad de resultados:', resultadosFiltrados.length);
+            renderResultados(resultadosFiltrados);
+        }
+
+        // Función para renderizar resultados
+        function renderResultados(productos) {
+            console.log('=== RENDERIZANDO RESULTADOS ===');
+            console.log('Productos recibidos:', productos);
+            console.log('Contenedor dashboard:', contenedorDashboard);
+            console.log('Contenedor existe:', !!contenedorDashboard);
+            console.log('Contenedor ID:', contenedorDashboard ? contenedorDashboard.id : 'N/A');
+            
+            if (!contenedorDashboard) {
+                console.log('ERROR: contenedorDashboard no está definido');
+                // Intentar obtenerlo nuevamente
+                contenedorDashboard = document.getElementById('dashboard-content');
+                console.log('Reintentando obtener contenedor:', contenedorDashboard);
+                if (!contenedorDashboard) {
+                    console.error('ERROR CRÍTICO: No se puede obtener el contenedor dashboard');
+                    return;
+                }
+            }
+            
+            const productosFiltrados = productos || [];
+            console.log('Productos filtrados:', productosFiltrados);
+            
+            if (productosFiltrados.length === 0) {
+                // Si no hay productos, mostrar mensaje pero mantener los filtros
+                console.log('No hay productos, mostrando mensaje sin resultados');
+                
+                // Solo crear la estructura completa si no existe
+                if (!contenedorDashboard.querySelector('.filters-container')) {
+                    contenedorDashboard.innerHTML = `
+                        <div class="exit-button-container">
+                            <button class="exit-button" onclick="clearDashboard()">✕</button>
+                        </div>
+                        <div class="results-header">
+                            <span class="results-title">Resultados</span>
+                            <div class="filters-container">
+                                <div class="filter-buttons">
+                                    <button class="filter-btn active" data-filter="all" onclick="aplicarFiltro('all')">Todos</button>
+                                    <button class="filter-btn" data-filter="comida" onclick="aplicarFiltro('comida')">Comida</button>
+                                    <button class="filter-btn" data-filter="bebidas" onclick="aplicarFiltro('bebidas')">Bebidas</button>
+                                    <button class="filter-btn" data-filter="postres" onclick="aplicarFiltro('postres')">Postres</button>
+                                </div>
+                                <div class="price-range-container">
+                                    <label>Rango de precio:</label>
+                                    <div class="price-inputs">
+                                        <input type="number" id="precio-min" placeholder="Min" min="0" step="1000">
+                                        <span>-</span>
+                                        <input type="number" id="precio-max" placeholder="Max" min="0" step="1000">
+                                        <button class="btn-apply-price" onclick="aplicarFiltroPrecio()">Aplicar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="results-container no-results-container">
+                            <div class="no-results-message">
+                                <p>No se encontraron productos en esta categoría</p>
+                                <p>Intenta con otra categoría o ajusta los filtros</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Solo actualizar el contenedor de resultados con mensaje
+                    const resultsContainer = contenedorDashboard.querySelector('.results-container');
+                    if (resultsContainer) {
+                        resultsContainer.classList.add('no-results-container');
+                        resultsContainer.innerHTML = `
+                            <div class="no-results-message">
+                                <p>No se encontraron productos en esta categoría</p>
+                                <p>Intenta con otra categoría o ajusta los filtros</p>
+                            </div>
+                        `;
+                    }
+                }
+                return;
+            }
+            
+            // Preparar contenedor de resultados dentro del dashboard
+            const htmlResultados = productosFiltrados.map(p => {
+                const id = p.id || p.id_producto || p.productoId || '';
+                const nombre = p.nombre || p.Nombre || 'Producto';
+                const precio = p.precio || p.Precio || 0;
+                const etiqueta = p.establecimiento_nombre || p.establecimiento || p.categoria || p.categoria_nombre || '';
+                return `
+                    <div class="product-card" data-id="${id}" data-nombre="${nombre}" data-precio="${precio}" data-categoria="${etiqueta}">
+                        <div class="product-card__info">
+                            <div class="product-card__name">${nombre}</div>
+                            <div class="product-card__meta">
+                                <span class="product-card__price">$${precio}</span>
+                                ${etiqueta ? `<span class=\"product-card__tag\">${etiqueta}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="product-card__actions">
+                            <button class="product-card__add" title="Agregar al carrito">Agregar</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            console.log('HTML generado:', htmlResultados);
+            console.log('Contenedor ANTES de actualizar:', contenedorDashboard.innerHTML.substring(0, 100) + '...');
+            
+            contenedorDashboard.classList.add('content--results');
+            document.body.classList.add('showing-results');
+            contenedorDashboard.style.display = 'block';
+            contenedorDashboard.style.visibility = 'visible';
+            contenedorDashboard.style.opacity = '1';
+            contenedorDashboard.style.position = 'relative';
+            contenedorDashboard.style.zIndex = '10';
+            
+            // Solo crear la estructura completa si no existe
+            if (!contenedorDashboard.querySelector('.filters-container')) {
+                contenedorDashboard.innerHTML = `
+                    <div class="exit-button-container">
+                        <button class="exit-button" onclick="clearDashboard()">✕</button>
+                    </div>
+                    <div class="results-header">
+                        <span class="results-title">Resultados</span>
+                        <div class="filters-container">
+                            <div class="filter-buttons">
+                                <button class="filter-btn active" data-filter="all" onclick="aplicarFiltro('all')">Todos</button>
+                                <button class="filter-btn" data-filter="comida" onclick="aplicarFiltro('comida')">Comida</button>
+                                <button class="filter-btn" data-filter="bebidas" onclick="aplicarFiltro('bebidas')">Bebidas</button>
+                                <button class="filter-btn" data-filter="postres" onclick="aplicarFiltro('postres')">Postres</button>
+                            </div>
+                            <div class="price-range-container">
+                                <label>Rango de precio:</label>
+                                <div class="price-inputs">
+                                    <input type="number" id="precio-min" placeholder="Min" min="0" step="1000">
+                                    <span>-</span>
+                                    <input type="number" id="precio-max" placeholder="Max" min="0" step="1000">
+                                    <button class="btn-apply-price" onclick="aplicarFiltroPrecio()">Aplicar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="results-container">${htmlResultados}</div>
+                `;
+            } else {
+                // Solo actualizar el contenedor de resultados
+                const resultsContainer = contenedorDashboard.querySelector('.results-container');
+                if (resultsContainer) {
+                    resultsContainer.classList.remove('no-results-container');
+                    resultsContainer.innerHTML = htmlResultados;
+                }
+            }
+            
+            console.log('Dashboard actualizado con resultados');
+            console.log('Contenedor después de actualizar:', contenedorDashboard.innerHTML.substring(0, 200) + '...');
+            
+            // Verificar si los elementos se crearon correctamente
+            const resultsContainer = contenedorDashboard.querySelector('.results-container');
+            const productCards = contenedorDashboard.querySelectorAll('.product-card');
+            console.log('Results container encontrado:', !!resultsContainer);
+            console.log('Product cards encontrados:', productCards.length);
+            console.log('Product cards:', productCards);
+            
+            // Forzar visibilidad de cada producto
+            productCards.forEach((card, index) => {
+                card.style.display = 'flex';
+                card.style.visibility = 'visible';
+                card.style.opacity = '1';
+                console.log(`Producto ${index + 1} forzado a visible:`, card);
+            });
+            
+            // Activar manejadores del carrito
+            activarBotonesAgregar();
+
+            console.log('=== FIN RENDERIZADO ===');
+        }
+
+        // Integración de Carrito: activar botones "Agregar"
+        function activarBotonesAgregar() {
+            try {
+                if (!window.CarritoCompras) {
+                    console.warn('CarritoCompras no está cargado');
+                    return;
+                }
+                const carrito = window.CarritoCompras.obtenerInstancia();
+                const botones = document.querySelectorAll('.product-card__add');
+                botones.forEach(btn => {
+                    if (btn.__cartBound) return; // evitar duplicar listeners
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const card = btn.closest('.product-card');
+                        if (!card) return;
+                        const id = card.getAttribute('data-id');
+                        const nombre = card.getAttribute('data-nombre');
+                        const precio = parseFloat(card.getAttribute('data-precio') || '0');
+                        const categoria = card.getAttribute('data-categoria') || '';
+                        const establecimientoId = card.getAttribute('data-establecimiento-id') || null;
+                        const productoPlano = { id, nombre, precio, categoria, establecimiento_id: establecimientoId, disponible: true };
+                        carrito.agregarProducto(productoPlano, 1);
+                    });
+                    btn.__cartBound = true;
+                });
+            } catch (err) {
+                console.error('Error activando botones de carrito:', err);
+            }
+        }
+
+        function clearDashboard() {
+            const dashboardContent = document.getElementById('dashboard-content');
+            const heroSection = document.querySelector('.hero');
+            const body = document.body;
+            
+            // Limpiar contenido
+            dashboardContent.innerHTML = '';
+            document.body.classList.remove('showing-results');
+            
+            // Mostrar nuevamente la imagen del hero
+            if (heroSection) {
+                heroSection.style.display = 'flex';
+            }
+            
+            // Bloquear scroll cuando se muestre la imagen
+            body.style.overflow = 'hidden';
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                // Limpiar datos de sesión específicos del cliente
+                localStorage.removeItem('snappy_cliente_actual');
+                localStorage.removeItem('snappy_cliente_tipo');
+                localStorage.removeItem('sesionCliente');
+                localStorage.removeItem('tiempoSesionCliente');
+                
+                // Redirigir a la página index de cliente
+                window.location.href = 'indexCliente.html';
+            }
+        }
+
+        // Inicializar dashboard y buscador (mostrar máximo 2 productos)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Bloquear scroll inicialmente
+            document.body.style.overflow = 'hidden';
+
+            // Inicializar buscador con patrón Strategy
+            console.log('Inicializando buscador...');
+            buscador = new window.BuscadorProductos(new window.BusquedaPorNombre());
+            console.log('Buscador inicializado correctamente');
+            
+            // Cargar productos después de inicializar el buscador
+            cargarProductos();
+            
+            // Cargar establecimientos desde la base de datos
+            cargarEstablecimientos();
+            
+            // Actualizar establecimientos cada 10 segundos para reflejar cambios de estado más rápido
+            setInterval(cargarEstablecimientos, 10000);
+
+            const entrada = document.getElementById('entrada-busqueda');
+            const boton = document.getElementById('boton-buscar');
+            contenedorDashboard = document.getElementById('dashboard-content');
+            heroSection = document.querySelector('.hero');
+
+            function buscar() {
+                const termino = (entrada.value || '').trim();
+                console.log('=== INICIANDO BÚSQUEDA ===');
+                console.log('Término de búsqueda:', termino);
+                console.log('Contenedor dashboard:', contenedorDashboard);
+                console.log('Buscador:', buscador);
+                
+                if (!termino) {
+                    console.log('Término vacío, mostrando todos los productos');
+                    // Mostrar todos los productos cuando no hay término de búsqueda
+                    productosActuales = buscador.obtenerProductosDisponibles();
+                    productosOriginales = [...productosActuales]; // Guardar copia de productos originales
+                    console.log('Productos disponibles:', productosActuales.length);
+                    
+                    // Asegurar que los resultados sean visibles (ocultar hero section)
+                    if (heroSection) {
+                        console.log('Ocultando hero section');
+                        heroSection.style.display = 'none';
+                    }
+                    document.body.style.overflow = 'auto';
+                    
+                    renderResultados(productosActuales);
+                    return;
+                }
+                
+                // Asegurar que los resultados sean visibles
+                if (heroSection) {
+                    console.log('Ocultando hero section');
+                    heroSection.style.display = 'none';
+                }
+                document.body.style.overflow = 'auto';
+                
+                // Usar el patrón Strategy para buscar productos
+                const resultados = buscador.buscarPorNombre(termino);
+                console.log('Resultados encontrados:', resultados.length);
+                console.log('Resultados:', resultados);
+                
+                // Almacenar productos actuales y originales para filtros
+                productosActuales = resultados;
+                productosOriginales = [...resultados]; // Guardar copia de productos originales
+                
+                console.log('Llamando a renderResultados...');
+                renderResultados(resultados);
+                console.log('=== FIN BÚSQUEDA ===');
+            }
+
+            if (boton) {
+                boton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    buscar();
+                });
+            }
+            if (entrada) {
+                entrada.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        buscar();
+                    }
+                });
+            }
+
+            // Carrito: toggle panel
+            const cartToggle = document.getElementById('cart-toggle');
+            const cartClose = document.getElementById('cart-close');
+            const cartPanel = document.getElementById('cart-panel');
+            if (cartToggle && cartPanel) {
+                cartToggle.addEventListener('click', () => {
+                    const abierto = cartPanel.style.right === '0px';
+                    if (abierto) {
+                        cartPanel.style.right = '-360px';
+                    } else {
+                        actualizarUICarrito();
+                        cartPanel.style.right = '0px';
+                    }
+                });
+            }
+            if (cartClose && cartPanel) {
+                cartClose.addEventListener('click', () => {
+                    cartPanel.style.right = '-360px';
+                });
+            }
+        });
+    </script>
+
+    <script>
+        // Mostrar nombre de usuario si está en localStorage (ejecutar inmediatamente)
+        (function(){
+            try {
+                const u = JSON.parse(localStorage.getItem('snappy_cliente_actual') || 'null');
+                if (u && u.datos && u.datos.nombre) {
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.datos.nombre;
+                } else if (u && u.nombre) {
+                    // Fallback para estructura antigua
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.nombre;
+                }
+            } catch (e) {
+                console.error('Error al cargar nombre de usuario:', e);
+            }
+        })();
+
+        // Manejar retorno de pago desde MercadoPago
+        (function(){
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('payment');
+            
+            if (paymentStatus === 'success') {
+                console.log('Pago detectado como exitoso desde MercadoPago');
+                
+                // Limpiar carrito después de pago exitoso
+                try {
+                    if (window.CarritoCompras) {
+                        const carrito = window.CarritoCompras.obtenerInstancia();
+                        carrito.vaciarCarrito();
+                        actualizarBadgeCarrito();
+                        actualizarUICarrito();
+                    }
+                } catch (e) {
+                    console.log('No se pudo limpiar el carrito:', e);
+                }
+                
+                // Mostrar notificación de éxito
+                setTimeout(() => {
+                    alert('¡Pago procesado exitosamente! 🎉\n\nEl carrito ha sido vaciado y el pago se ha simulado correctamente en el entorno de sandbox.');
+                }, 1000);
+                
+                // Limpiar parámetros de la URL para que no se muestre el mensaje otra vez
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        })();
+    </script>
+
+    <script>
+        // Utilidades de UI para Carrito
+        function formatearCOP(n) {
+            try { return `$${Number(n || 0).toLocaleString('es-CO')}`; } catch { return `$${n}`; }
+        }
+
+        function actualizarBadgeCarrito() {
+            try {
+                if (!window.CarritoCompras) return;
+                const carrito = window.CarritoCompras.obtenerInstancia();
+                const badge = document.getElementById('cart-badge');
+                if (badge) badge.textContent = String(carrito.obtenerCantidadTotal());
+            } catch (e) { console.warn('No se pudo actualizar badge del carrito', e); }
+        }
+
+        function actualizarUICarrito() {
+            try {
+                if (!window.CarritoCompras) return;
+                const carrito = window.CarritoCompras.obtenerInstancia();
+                const items = carrito.obtenerProductos();
+                const cont = document.getElementById('cart-items');
+                const totalEl = document.getElementById('cart-total');
+                if (!cont) return;
+
+                if (!items || items.length === 0) {
+                    cont.innerHTML = '<p style="color:#666; text-align:center; margin-top:20px;">Tu carrito está vacío</p>';
+                } else {
+                    cont.innerHTML = items.map(({ producto, cantidad, subtotal }) => {
+                        const id = (producto && (producto.id || (producto.obtenerID && producto.obtenerID()))) || '';
+                        const nombre = (producto && (producto.nombre || (producto.obtenerNombre && producto.obtenerNombre()))) || 'Producto';
+                        const precio = (producto && (producto.precio || (producto.obtenerPrecio && producto.obtenerPrecio()))) || 0;
+                        return `
+                            <div style="display:flex; align-items:center; justify-content: space-between; padding:8px 0; border-bottom:1px solid #f1f1f1;">
+                                <div style="display:flex; flex-direction:column;">
+                                    <strong style="font-size:14px;">${nombre}</strong>
+                                    <span style="font-size:12px; color:#666;">${formatearCOP(precio)}</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:12px; color:#333;">x${cantidad}</span>
+                                    <strong style="font-size:13px;">${formatearCOP(subtotal)}</strong>
+                                    <button data-id="${id}" class="cart-remove" style="background:transparent; border:1px solid #ddd; border-radius:6px; padding:4px 6px; cursor:pointer;">Eliminar</button>
+                                </div>
+                            </div>`;
+                    }).join('');
+
+                    // Bind eliminar
+                    cont.querySelectorAll('.cart-remove').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const id = btn.getAttribute('data-id');
+                            const carrito = window.CarritoCompras.obtenerInstancia();
+                            carrito.eliminarProducto(id);
+                            actualizarBadgeCarrito();
+                            actualizarUICarrito();
+                        });
+                    });
+                }
+
+                if (totalEl) totalEl.textContent = formatearCOP(window.CarritoCompras.obtenerInstancia().obtenerTotal());
+            } catch (e) { console.error('Error actualizando UI del carrito', e); }
+        }
+
+        // Hook básico para que al agregar se actualice el badge
+        (function parcheAgregar() {
+            if (!window.CarritoCompras) return;
+            const original = CarritoCompras.prototype.agregarProducto;
+            CarritoCompras.prototype.agregarProducto = function(producto, cantidad) {
+                const res = original.call(this, producto, cantidad);
+                try { actualizarBadgeCarrito(); } catch {}
+                return res;
+            };
+        })();
+
+        // Checkout simulado con MercadoPago Mock
+        (function initCheckout() {
+            const btnCheckout = document.getElementById('cart-checkout');
+            if (btnCheckout) {
+                btnCheckout.addEventListener('click', async () => {
+                    try {
+                        const carrito = window.CarritoCompras.obtenerInstancia();
+                        const payload = carrito.prepararCheckout();
+                        
+                        console.log('Iniciando checkout simulado...', payload);
+                        
+                        // Mostrar loading
+                        btnCheckout.textContent = 'Procesando...';
+                        btnCheckout.disabled = true;
+                        
+                        // Llamar a la API real de MercadoPago
+                        const response = await fetch('http://localhost/SnappyVistas/database/checkout_real.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        const result = await response.json();
+                        console.log('Respuesta del mock:', result);
+                        
+                        // Restaurar botón
+                        btnCheckout.textContent = 'Proceder al pago';
+                        btnCheckout.disabled = false;
+                        
+                        if (result.success) {
+                            // Redirigir directamente a MercadoPago
+                            const redirectUrl = result.data.sandbox_init_point || result.data.init_point;
+                            console.log('Redirigiendo a MercadoPago:', redirectUrl);
+                            window.location.href = redirectUrl;
+                        } else {
+                            // Mostrar error
+                            alert(`Error: ${result.error}\n${result.message}`);
+                        }
+                        
+                    } catch (e) {
+                        console.error('Error en checkout:', e);
+                        alert('Error de conexión: ' + e.message);
+                        
+                        // Restaurar botón
+                        const btnCheckout = document.getElementById('cart-checkout');
+                        if (btnCheckout) {
+                            btnCheckout.textContent = 'Proceder al pago';
+                            btnCheckout.disabled = false;
+                        }
+                    }
+                });
+            }
+        })();
+        
+        // Modal para mostrar resultado del checkout
+        function mostrarModalCheckout(data) {
+            // Crear modal si no existe
+            let modal = document.getElementById('checkout-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'checkout-modal';
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); z-index: 2000; display: flex;
+                    align-items: center; justify-content: center;
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 12px; padding: 24px; max-width: 500px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
+                        <h2 style="margin: 0; color: #28a745;">¡Pago Simulado Creado!</h2>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <strong>ID de Preferencia:</strong>
+                            <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">${data.id}</code>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <strong>Estado:</strong>
+                            <span style="color: #ffc107; font-weight: bold;">${data.status}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <strong>Total:</strong>
+                            <span style="font-weight: bold;">$${Number(data.total_amount).toLocaleString('es-CO')}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>Items:</strong>
+                            <span>${data.items.length} productos</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 8px 0;">Productos:</h4>
+                        ${data.items.map(item => `
+                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee;">
+                                <span>${item.title} x${item.quantity}</span>
+                                <span>$${Number(item.unit_price * item.quantity).toLocaleString('es-CO')}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="cerrarModalCheckout()" style="background: #6c757d; color: white; border: none; border-radius: 8px; padding: 12px 24px; cursor: pointer; margin-right: 8px;">
+                            Cancelar
+                        </button>
+                        <button onclick="irAPagar('${data.init_point}')" style="background: #28a745; color: white; border: none; border-radius: 8px; padding: 12px 24px; cursor: pointer;">
+                            Ir a Pagar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        function cerrarModalCheckout() {
+            const modal = document.getElementById('checkout-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        function irAPagar(initPoint) {
+            // Redirigir a MercadoPago
+            window.location.href = initPoint;
+        }
+        
+        function simularPagoExitoso(preferenciaId) {
+            cerrarModalCheckout();
+            
+            // Simular pago exitoso
+            const carrito = window.CarritoCompras.obtenerInstancia();
+            carrito.vaciarCarrito();
+            actualizarBadgeCarrito();
+            actualizarUICarrito();
+            
+            // Cerrar panel del carrito
+            const cartPanel = document.getElementById('cart-panel');
+            if (cartPanel) {
+                cartPanel.style.right = '-360px';
+            }
+            
+            alert(`¡Pago simulado exitoso!\nPreferencia: ${preferenciaId}\n\nEl carrito ha sido vaciado.`);
+        }
+    </script>
+</body>
+</html>

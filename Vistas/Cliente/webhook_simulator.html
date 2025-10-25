@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Simulator - SnappyVistas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg,#fff8f2 55%,#ffe6df 100%);
+            margin: 0;
+            padding: 22px;
+            min-height: 100vh;
+        }
+        .container {
+            background: linear-gradient(135deg, #fff3ea 70%, #ffeae3 100%);
+            border-radius: 19px;
+            padding: 38px;
+            box-shadow: 0 4px 26px 0 #e08b5e23, 0 2.5px 15px 0 #e58b5e17;
+            max-width: 830px;
+            margin: 0 auto;
+            border: 1.6px solid #ffd0c2;
+        }
+        h1 {
+            color: #e53e3e;
+            text-align: center;
+            margin-bottom: 28px;
+            letter-spacing: 0.5px;
+            font-size: 2rem;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 21px;
+            border: 1.3px solid #ffd7c7;
+            border-radius: 14px;
+            background: linear-gradient(90deg, #fff3ea 75%, #ffeae3 100%);
+            box-shadow: 0 1.2px 9px 0 #ffbfa319;
+        }
+        .section h3 {
+            color: #592c19;
+            font-size: 17px;
+            font-weight: 570;
+            border-left: 4px solid #e53e3e;
+            background: none;
+            padding: 2px 0 2px 14px;
+            margin: 0 0 20px 0;
+            border-radius: 0;
+            box-shadow: none;
+            letter-spacing: .12px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a74128;
+            font-weight: 600;
+            letter-spacing: 0.22px;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1.3px solid #ffd0c2;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #fff8f2;
+            color: #2e2e2e;
+            transition: border 0.2s, background 0.21s;
+        }
+        select:focus, input:focus {
+            border-color: #e53e3e;
+            outline: none;
+            background: #ffeae3;
+        }
+        .btn {
+            background: linear-gradient(90deg, #e53e3e 65%, #ff6f47 100%);
+            color: #fff;
+            border: none;
+            padding: 15px 33px;
+            border-radius: 15px;
+            font-size: 16.2px;
+            font-weight: 650;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 13px;
+            box-shadow: 0 4.5px 23px #ff6f4734, 0 0.5px 2.5px #e53e3e18;
+            letter-spacing: .33px;
+            transition: box-shadow .36s cubic-bezier(.4,2,.6,1), transform .25s cubic-bezier(.4,2,.6,1);
+        }
+        .btn:hover {
+            box-shadow: 0 13px 38px 0 #e53e3e52, 0 2.5px 14px 0 #ff6f4716;
+            transform: translateY(-4.3px) scale(1.052);
+        }
+        .btn-success {
+            background: linear-gradient(90deg,#ffb6a1 60%,#ffd7c7 100%);
+            color: #a74128;
+            border: none;
+            padding: 13px 30px;
+            border-radius: 15px;
+            font-weight: 600;
+            box-shadow: 0 3px 13px #ffb6a12c;
+        }
+        .btn-success:hover {
+            box-shadow: 0 10px 30px 0 #ffd7c76e, 0 1.5px 7px 0 #d6765d15;
+            transform: translateY(-2.8px) scale(1.03);
+            color: #a74128;
+        }
+        .btn-danger {
+            background: linear-gradient(90deg,#e9573d 60%,#ffbfb0 100%);
+            color: #fff;
+            border: none;
+            padding: 13px 30px;
+            border-radius: 15px;
+            font-weight: 600;
+            box-shadow: 0 3px 13px #ffbfb038;
+        }
+        .btn-danger:hover {
+            box-shadow: 0 10px 27px 0 #ea5c4018, 0 1.5px 8px 0 #e9583a20;
+            transform: translateY(-2.8px) scale(1.035);
+        }
+        .btn-warning {
+            background: linear-gradient(90deg,#ffd0c2 60%, #fff5ee 100%);
+            color: #a3784c;
+            border: none;
+            padding: 13px 30px;
+            border-radius: 15px;
+            font-weight: 600;
+            box-shadow: 0 3px 13px #ffd7c733;
+        }
+        .btn-warning:hover {
+            box-shadow: 0 9px 22px 0 #ffd7c763, 0 1.5px 8px 0 #c295749f;
+            transform: translateY(-2.6px) scale(1.032);
+            color: #a3784c;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            background: #fff3ea;
+            color: #a74128;
+            border: 1.3px solid #ffd0c2;
+            font-weight: 500;
+            box-shadow: 0 2px 7px #ffc7ae31;
+        }
+        .success {
+            background: #ffeae3;
+            color: #a74128;
+            border: 1.3px solid #ffd7c7;
+        }
+        .error {
+            background: #ffd0c2;
+            color: #e9583a;
+            border: 1.3px solid #ffa98d;
+        }
+        .info {
+            background: #fff5ee;
+            color: #a3784c;
+            border: 1.3px solid #ffd7c7;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 1.3px solid #ffd0c2;
+        }
+        .status-online { background: #e53e3e;}
+        .status-offline { background: #ffd0c2;}
+        .status-pending { background: #ffd7c7;}
+        .icono-usuario {
+            height: 18px;
+            width: 18px;
+            margin-right: 7px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            background: #ffeae3;
+            border: 1.1px solid #ffd0c2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Webhook Simulator - MercadoPago</h1>
+        
+        <!-- Estado del Sistema -->
+        <div class="section">
+            <h3><span class="status-indicator status-online"></span>Estado del Sistema</h3>
+            <div class="info">
+                <strong>Webhook Simulator Activo</strong><br>
+                Este simulador procesa automáticamente las notificaciones de pago de MercadoPago.<br>
+                <strong>Endpoint:</strong> <code>database/webhook_mercadopago.php</code>
+            </div>
+        </div>
+
+        <!-- Simulación Manual -->
+        <div class="section">
+            <h3>Simulación Manual de Webhook</h3>
+            <form id="webhookForm">
+                <div class="form-group">
+                    <label for="preferenceId">ID de Preferencia:</label>
+                    <input type="text" id="preferenceId" placeholder="Ej: MP-1760980297-4517" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentId">ID de Pago (opcional):</label>
+                    <input type="text" id="paymentId" placeholder="Dejar vacío para simular">
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Estado del Pago:</label>
+                    <select id="status" required>
+                        <option value="approved"> APPROVED (Pago exitoso)</option>
+                        <option value="rejected"> REJECTED (Pago rechazado)</option>
+                        <option value="pending"> PENDING (Pago pendiente)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">Simular Webhook</button>
+            </form>
+
+            <div id="webhookResult" class="result"></div>
+        </div>
+
+        <!-- Procesamiento Automático -->
+        <div class="section">
+            <h3> Procesamiento Automático</h3>
+            <div class="form-group">
+                <label for="autoPreferenceId">ID de Preferencia para Auto-procesamiento:</label>
+                <input type="text" id="autoPreferenceId" placeholder="Pega aquí el ID de MercadoPago">
+            </div>
+            <button type="button" class="btn btn-success" onclick="autoProcessPayment()"> Auto-procesar Pago</button>
+            <div id="autoResult" class="result"></div>
+        </div>
+
+        <!-- Log de Actividad -->
+        <div class="section">
+            <h3> Log de Actividad</h3>
+            <div id="activityLog" class="log">
+                <div> Webhook Simulator iniciado...</div>
+                <div> Esperando notificaciones de pago...</div>
+            </div>
+            <button type="button" class="btn" onclick="clearLog()">Limpiar Log</button>
+        </div>
+
+        <!-- Enlaces Rápidos -->
+        <div class="section">
+            <h3> Enlaces Rápidos</h3>
+            <a href="dashboardCliente.html" class="btn">Dashboard Cliente</a>
+            <a href="../Establecimiento/dashboardEstablecimiento.html" class="btn"> Dashboard Establecimiento</a>
+            <a href="simulador_pago.html" class="btn"> Simulador Simple</a>
+        </div>
+    </div>
+
+    <script>
+        let activityLog = document.getElementById('activityLog');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            activityLog.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            activityLog.scrollTop = activityLog.scrollHeight;
+        }
+
+        function clearLog() {
+            activityLog.innerHTML = '<div> Webhook Simulator iniciado...</div>';
+        }
+
+        // Simulación de webhook
+        document.getElementById('webhookForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const preferenceId = document.getElementById('preferenceId').value.trim();
+            const paymentId = document.getElementById('paymentId').value.trim();
+            const status = document.getElementById('status').value;
+            
+            const resultDiv = document.getElementById('webhookResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = ' Procesando webhook...';
+            
+            log(` Simulando webhook - Preference: ${preferenceId}, Status: ${status}`);
+            
+            try {
+                // Simular datos de webhook
+                const webhookData = {
+                    preference_id: preferenceId,
+                    payment_id: paymentId || null,
+                    status: status
+                };
+                
+                // Enviar al webhook
+                const response = await fetch('http://localhost/SnappyVistas/database/webhook_mercadopago.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(webhookData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong><img src='../imagenes/comprobar.png' class='icono-comprobar' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> Webhook Procesado Exitosamente</strong><br>
+                        <strong>Pedido ID:</strong> ${result.pedido_id}<br>
+                        <strong>Estado:</strong> ${result.estado}<br>
+                        <strong>Preferencia:</strong> ${result.preference_id}<br><br>
+                        <a href="../Establecimiento/dashboardEstablecimiento.html" style="color: #155724; text-decoration: underline;">
+                            👀 Ver pedidos actualizados
+                        </a>
+                    `;
+                    log(`✅ Webhook exitoso - Pedido ${result.pedido_id} actualizado a ${result.estado}`);
+                } else {
+                    throw new Error(result.error || 'Error procesando webhook');
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ Error en Webhook:</strong> ${error.message}<br><br>
+                    <strong>Posibles causas:</strong><br>
+                    • Preference ID no encontrado en la base de datos<br>
+                    • Error de conexión con la base de datos<br>
+                    • Datos de webhook inválidos
+                `;
+                log(`❌ Error en webhook: ${error.message}`);
+            }
+        });
+
+        // Funciones de simulación rápida
+        function simulateSuccess() {
+            document.getElementById('status').value = 'approved';
+            document.getElementById('paymentId').value = 'PAY_' + Date.now();
+            log('✅ Configurado para simular pago exitoso');
+        }
+
+        function simulateFailure() {
+            document.getElementById('status').value = 'rejected';
+            document.getElementById('paymentId').value = '';
+            log('❌ Configurado para simular pago rechazado');
+        }
+
+        function simulatePending() {
+            document.getElementById('status').value = 'pending';
+            document.getElementById('paymentId').value = '';
+            log('⏳ Configurado para simular pago pendiente');
+        }
+
+        // Auto-procesamiento
+        async function autoProcessPayment() {
+            const preferenceId = document.getElementById('autoPreferenceId').value.trim();
+            if (!preferenceId) {
+                alert('Por favor ingresa un ID de preferencia');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('autoResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = ' Auto-procesando pago...';
+            
+            log(` Auto-procesando pago para preference: ${preferenceId}`);
+            
+            try {
+                // Simular webhook con estado aprobado
+                const webhookData = {
+                    preference_id: preferenceId,
+                    payment_id: 'PAY_AUTO_' + Date.now(),
+                    status: 'approved'
+                };
+                
+                const response = await fetch('http://localhost/SnappyVistas/database/webhook_mercadopago.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(webhookData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>🚀 Auto-procesamiento Exitoso</strong><br>
+                        <strong>Pedido ID:</strong> ${result.pedido_id}<br>
+                        <strong>Estado:</strong> ${result.estado}<br>
+                        <strong>Preferencia:</strong> ${result.preference_id}<br><br>
+                        <strong><img src='../imagenes/comprobar.png' class='icono-comprobar' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> El pedido ha sido marcado como PAGADO automáticamente</strong>
+                    `;
+                    log(` Auto-procesamiento exitoso - Pedido ${result.pedido_id} marcado como PAGADO`);
+                } else {
+                    throw new Error(result.error || 'Error en auto-procesamiento');
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ Error en Auto-procesamiento:</strong> ${error.message}<br><br>
+                    <strong>Verifica que:</strong><br>
+                    • El ID de preferencia sea correcto<br>
+                    • Exista un pedido pendiente para esa preferencia<br>
+                    • La conexión a la base de datos funcione
+                `;
+                log(`❌ Error en auto-procesamiento: ${error.message}`);
+            }
+        }
+
+        // Auto-completar desde URL si hay parámetros
+        const urlParams = new URLSearchParams(window.location.search);
+        const prefId = urlParams.get('preference-id');
+        if (prefId) {
+            document.getElementById('preferenceId').value = prefId;
+            document.getElementById('autoPreferenceId').value = prefId;
+            log(`🔗 Preference ID detectado desde URL: ${prefId}`);
+        }
+
+        // Inicialización
+        log(' Webhook Simulator listo para procesar pagos');
+    </script>
+</body>
+</html>
+
+
+
+

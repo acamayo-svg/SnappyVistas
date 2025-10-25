@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Snappy - Registro Establecimiento</title>
+    <link rel="stylesheet" href="css\registroEstablecimiento.css">
+</head>
+<body>
+    <!-- Encabezado -->
+    <header class="encabezado">
+        <div class="logo">
+            <img src="..\imagenes/logo-snappy.png" alt="Snappy" class="imagen-logo-header">
+        </div>
+    </header>
+
+    <!-- Vista de Registro -->
+    <main class="contenedor-formulario">
+        <div class="modal-formulario aparicion-gradual">
+            <button class="boton-cerrar" onclick="volverASeleccion()">✕</button>
+            <h2 class="titulo-formulario">Registro Establecimiento</h2>
+            
+            <div id="contenedor-mensajes-registro" class="contenedor-mensajes"></div>
+            
+            <form id="formulario-registro" class="formulario-registro">
+                <div class="grilla-formulario">
+                    <div class="grupo-formulario">
+                        <input 
+                            type="text" 
+                            class="entrada-formulario entrada-nombre-establecimiento" 
+                            id="nombre-establecimiento" 
+                            name="nombreEstablecimiento"
+                            placeholder="Nombre establecimiento" 
+                            required
+                            autocomplete="organization"
+                        >
+                    </div>
+                    <div class="grupo-formulario">
+                        <input 
+                            type="email" 
+                            class="entrada-formulario entrada-correo-establecimiento" 
+                            id="correo-establecimiento" 
+                            name="correoEstablecimiento"
+                            placeholder="Correo" 
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+                    <div class="grupo-formulario">
+                        <input 
+                            type="text" 
+                            class="entrada-formulario entrada-razon-social" 
+                            id="razon-social" 
+                            name="razonSocial"
+                            placeholder="Razón Social" 
+                            required
+                            autocomplete="organization"
+                        >
+                    </div>
+                    <div class="grupo-formulario">
+                        <input 
+                            type="password" 
+                            class="entrada-formulario entrada-contrasena-establecimiento" 
+                            id="contrasena-establecimiento" 
+                            name="contrasenaEstablecimiento"
+                            placeholder="Contraseña" 
+                            required
+                            autocomplete="new-password"
+                            minlength="6"
+                        >
+                    </div>
+                    <div class="grupo-formulario grupo-completo">
+                        <input 
+                            type="tel" 
+                            class="entrada-formulario entrada-telefono-establecimiento" 
+                            id="telefono-establecimiento" 
+                            name="telefonoEstablecimiento"
+                            placeholder="Teléfono" 
+                            required
+                            autocomplete="tel"
+                            pattern="[0-9]{10,}"
+                        >
+                    </div>
+                </div>
+                <button type="submit" class="boton-registrar-iniciar">
+                    Registrarme e iniciar sesión
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // Variables específicas de la vista de registro
+        let datosEstablecimiento = null;
+        let validacionActiva = false;
+
+        // Función para volver a la selección
+        function volverASeleccion() {
+            if (confirm('¿Deseas volver al menú principal? Los datos ingresados se perderán.')) {
+                window.location.href = 'seleccion.html';
+            }
+        }
+
+        // Función para validar correo electrónico
+        function validarCorreoElectronico(correo) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(correo);
+        }
+
+        // Validación en tiempo real
+        function configurarValidacionTiempoReal() {
+            const entradas = document.querySelectorAll('.entrada-formulario');
+            
+            entradas.forEach(entrada => {
+                entrada.addEventListener('input', function() {
+                    validarCampo(this);
+                });
+                
+                entrada.addEventListener('blur', function() {
+                    validarCampo(this);
+                });
+            });
+        }
+
+        // Validar campo individual
+        function validarCampo(campo) {
+            const valor = campo.value.trim();
+            const nombre = campo.name;
+            let esValido = true;
+
+            // Limpiar clases previas
+            campo.classList.remove('entrada-valida', 'entrada-invalida');
+
+            switch(nombre) {
+                case 'nombreEstablecimiento':
+                    esValido = valor.length >= 2;
+                    break;
+                case 'correoEstablecimiento':
+                    esValido = validarCorreoElectronico(valor);
+                    break;
+                case 'razonSocial':
+                    esValido = valor.length >= 2;
+                    break;
+                case 'contrasenaEstablecimiento':
+                    esValido = valor.length >= 6;
+                    break;
+                case 'telefonoEstablecimiento':
+                    esValido = valor.length >= 10 && /^\d+$/.test(valor);
+                    break;
+            }
+
+            // Aplicar clase visual
+            if (valor.length > 0) {
+                campo.classList.add(esValido ? 'entrada-valida' : 'entrada-invalida');
+            }
+
+            return esValido;
+        }
+
+        // Manejo del formulario de registro
+        document.getElementById('formulario-registro').addEventListener('submit', function(evento) {
+            evento.preventDefault();
+            
+            const botonEnvio = this.querySelector('.boton-registrar-iniciar');
+            const datosFormulario = {
+                nombreEstablecimiento: document.getElementById('nombre-establecimiento').value.trim(),
+                correoEstablecimiento: document.getElementById('correo-establecimiento').value.trim(),
+                razonSocial: document.getElementById('razon-social').value.trim(),
+                contrasenaEstablecimiento: document.getElementById('contrasena-establecimiento').value,
+                telefonoEstablecimiento: document.getElementById('telefono-establecimiento').value.trim()
+            };
+
+            // Validar todos los campos
+            const camposValidos = Object.keys(datosFormulario).every(campo => {
+                const elemento = document.getElementById(campo.replace('Establecimiento', '-establecimiento').replace('Social', '-social'));
+                return validarCampo(elemento);
+            });
+
+            if (!camposValidos) {
+                mostrarMensajeRegistro('Por favor, completa todos los campos correctamente.', 'error');
+                return;
+            }
+
+            // Validaciones específicas
+            if (!validarCorreoElectronico(datosFormulario.correoEstablecimiento)) {
+                mostrarMensajeRegistro('Por favor ingresa un correo electrónico válido', 'error');
+                return;
+            }
+
+            if (datosFormulario.contrasenaEstablecimiento.length < 6) {
+                mostrarMensajeRegistro('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+
+            if (datosFormulario.telefonoEstablecimiento.length < 10 || !/^\d+$/.test(datosFormulario.telefonoEstablecimiento)) {
+                mostrarMensajeRegistro('El teléfono debe tener al menos 10 dígitos numéricos', 'error');
+                return;
+            }
+
+            // Estado de carga
+            botonEnvio.classList.add('boton-cargando');
+            botonEnvio.disabled = true;
+
+            // Enviar al backend
+            const payload = {
+                nombre: datosFormulario.nombreEstablecimiento,
+                correo: datosFormulario.correoEstablecimiento,
+                telefono: datosFormulario.telefonoEstablecimiento,
+                password: datosFormulario.contrasenaEstablecimiento,
+                tipo_usuario: 'ESTABLECIMIENTO'
+            };
+
+            fetch('http://localhost/SnappyVistas/database/registro.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(async (r) => {
+                const data = await r.json().catch(() => ({}));
+                if (!r.ok || !data.success) throw new Error(data.error || 'Error registrando establecimiento');
+                mostrarMensajeRegistro('Registro exitoso. Redirigiendo al panel de control...', 'exito');
+                setTimeout(() => { window.location.href = 'dashboardEstablecimiento.html'; }, 1200);
+            })
+            .catch((e) => {
+                mostrarMensajeRegistro(e.message || 'Error en el registro', 'error');
+            })
+            .finally(() => {
+                botonEnvio.classList.remove('boton-cargando');
+                botonEnvio.disabled = false;
+            });
+        });
+
+        // Función para mostrar mensajes
+        function mostrarMensajeRegistro(mensaje, tipo) {
+            const contenedor = document.getElementById('contenedor-mensajes-registro');
+            const claseCSS = tipo === 'error' ? 'mensaje-error' : 'mensaje-exito';
+            
+            contenedor.innerHTML = `<div class="${claseCSS}">${mensaje}</div>`;
+            
+            // Limpiar mensaje después de 5 segundos para mensajes de error
+            if (tipo === 'error') {
+                setTimeout(() => {
+                    contenedor.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Inicializar vista
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Vista de registro cargada');
+            configurarValidacionTiempoReal();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snappy - Establecimiento</title>
+    <link rel="stylesheet" href="css/indexEstablecimiento.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="volverPrincipal()" title="Volver a página principal">
+                ← Volver
+            </button>
+            <span class="location"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> Popayán</span>
+            <div class="logo-container">
+                <img src="../imagenes/logo-snappy.png" alt="Logo" class="logo">
+            </div>
+            <button class="access" onclick="irASeleccionEstablecimiento()">ACCEDER</button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-message">
+            <h1>Bienvenido Establecimiento</h1>
+        </div>
+    </div>
+
+    <!-- Brands -->
+    <div class="brands">
+        <img src="../imagenes/cafe-cauca.png" alt="Marca 1">
+        <img src="../imagenes/cruz-verde.png" alt="Marca 2">
+        <img src="../imagenes/dominos.png" alt="Marca 3">
+        <img src="../imagenes/juan-valdez.png" alt="Marca 4">
+        <img src="../imagenes/la-rebaja.png" alt="Marca 5">
+        <img src="../imagenes/mario.png" alt="Marca 6">
+        <img src="../imagenes/popsy.png" alt="Marca 7">
+        <img src="../imagenes/velez.png" alt="Marca 8">
+        <img src="../imagenes/ishop.png" alt="Marca 9">
+    </div>
+
+    <!-- Promos -->
+    <div class="promo-card">
+        <span class="promo-badge">NUEVO</span>
+        <div class="promo-avatar-circle left">
+            <img src="../imagenes/canasta-compras.jpg" alt="Entrega Rápida">
+        </div>
+        <div class="promo-content">
+            <h3>Pide de todo</h3>
+            <p>Restaurantes, droguerías, tiendas y mucho más en un solo lugar. Todo lo que necesitas, siempre cerca de ti.</p>
+        </div>
+    </div>
+    <div class="promo-card reverse">
+        <span class="promo-badge orange">RÁPIDO</span>
+        <div class="promo-avatar-circle right">
+            <img src="../imagenes/repartidor-moto.jpg" alt="Entrega Segura">
+        </div>
+        <div class="promo-content">
+            <h3>Entrega segura</h3>
+            <p>Contamos con repartidores capacitados y rutas seguras para que recibas tus pedidos de manera rápida y confiable, estés donde estés en la ciudad.</p>
+        </div>
+    </div>
+    <div class="promo-card center-avatar">
+        <span class="promo-badge yellow">FÁCIL</span>
+        <div class="promo-avatar-circle center">
+            <img src="../imagenes/hombre-telefono.jpg" alt="Pedido Fácil">
+        </div>
+        <div class="promo-content">
+            <h3>Tus pedidos en minutos</h3>
+            <p>Elige lo que quieras en pocos pasos. Usa filtros para encontrar lo que buscas y paga de forma segura con tarjeta o en efectivo. ¡Tu pedido en minutos!</p>
+        </div>
+    </div>
+    <!-- Fin promos -->
+
+    <!-- Popayán-->
+    <div class="popayan-minimal">
+      <img src="../imagenes/torre-reloj.png" alt="Popayán ciudad blanca" class="popayan-img-minimal">
+      <div class="popayan-minimal-info">
+        <h3>Popayán, la ciudad blanca</h3>
+        <p>Disfruta de un servicio pensado para ti. Encuentra tus restaurantes favoritos, locales cercanos y recibe tus pedidos de forma rápida y segura en cualquier punto de la ciudad.</p>
+      </div>
+    </div>
+    <!-- Fin Popayán -->
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <div>TÉRMINOS</div>
+            <div>PRIVACIDAD</div>
+            <div>AYUDA</div>
+            <div>CONTACTO</div>
+        </div>
+
+        <hr>
+
+        <div class="footer-bottom">
+            <img src="imagenes/logo-snappy.png" alt="Fast & Easy">
+            <div class="social">
+                <span>Síguenos</span>
+                <div class="social-icons"><img src="../imagenes/facebook.png" alt="Facebook" style="height:18px;width:auto;display:inline-block;vertical-align:middle;margin-right:3px;"><img src="../imagenes/instagram.png" alt="Instagram" style="height:18px;width:auto;display:inline-block;vertical-align:middle;margin-right:3px;"></div>
+            </div>
+        </div>
+
+        <div class="footer-location">
+            Popayán, Cauca - Colombia
+        </div>
+
+    </footer>
+    <script>
+        function volverPrincipal() {
+            window.location.href = '../indexPrincipal.html';
+        }
+        
+        function irASeleccionEstablecimiento() {
+            window.location.href = 'seleccionEstablecimiento.html';
+        }
+    </script>
+</body>
+</html>

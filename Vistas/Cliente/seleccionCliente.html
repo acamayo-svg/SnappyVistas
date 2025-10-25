@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast & Easy - Registro</title>
+    <link rel="stylesheet" href="css/seleccionCliente.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../imagenes/logo-snappy.png" alt="Snappy Logo" class="logo">
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="modal-container">
+            <button class="close-btn" onclick="volver()">✕</button>
+            
+            <h1>Regístrate o inicia sesión</h1>
+            
+            <button class="btn btn-continuar" onclick="registrar()">
+                <span class="icon">✉</span>
+                Continuar con correo
+            </button>
+            
+            <button class="btn btn-tengo-cuenta" onclick="iniciarSesion()">
+                YA TENGO CUENTA
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function volver() {
+            window.location.href = 'indexCliente.html';
+        }
+
+        function registrar() {
+            // Redirige a la página de registro
+            window.location.href = 'registroCliente.html';
+        }
+
+        function iniciarSesion() {
+            // Redirige a la página de inicio de sesión
+            window.location.href = 'inicioCliente.html';
+        }
+    </script>
+</body>
+</html>

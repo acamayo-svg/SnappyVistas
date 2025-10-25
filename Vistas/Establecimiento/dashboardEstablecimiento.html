@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Establecimiento - Snappy</title>
+    <link rel="stylesheet" href="css/dashboardEstablecimiento.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <span class="location"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> Popayán</span>
+            <div class="logo-container">
+                <img src="../imagenes/logo-snappy.png" alt="Logo" class="logo">
+            </div>
+            <div class="controls">
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+                <div class="user">
+                    <span class="user-icon"><img src="../imagenes/establecimiento_1.png" alt="Establecimiento" style="height:19px;width:auto;vertical-align:middle;margin-right:4px;"></span>
+                    <span class="user-text" id="user-name">Establecimiento</span>
+                </div>
+                <button class="logout-btn" onclick="cerrarSesion()" title="Cerrar sesión">
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="panel-actions" style="max-width: 960px; margin: 90px auto 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="establecimiento-info" style="display: flex; align-items: center; gap: 15px;">
+                <div class="productos-count" id="productos-count" style="padding: 8px 12px; background: #f3f4f6; border-radius: 20px; font-size: 14px; color: #374151;">
+                    <span id="productos-total">0</span> productos
+                </div>
+            </div>
+            <div class="action-buttons" style="display: flex; gap: 10px;">
+                <button id="btn-agregar-producto" class="btn-accion" style="background:#e53e3e;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">Agregar Producto</button>
+            </div>
+        </div>
+
+        <!-- Lista de Productos -->
+        <div class="productos-section" style="max-width: 960px; margin: 20px auto; padding: 0 20px;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #374151; font-size: 18px;">Mis Productos</h3>
+                <button id="btn-refrescar-productos" style="background: #6b7280; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;"><img src="../imagenes/boton-de-actualizacion.png" alt="Actualizar" style="height:17px;width:auto;vertical-align:middle;margin-right:4px;"> Actualizar</button>
+            </div>
+            <div id="lista-productos" style="display: grid; gap: 12px;">
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Pedidos -->
+        <div class="pedidos-section" style="max-width: 960px; margin: 30px auto; padding: 0 20px;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="margin: 0; color: #374151; font-size: 18px;">Gestión de Pedidos</h3>
+                <button id="btn-refrescar-pedidos" style="background: #2563eb; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;"><img src="../imagenes/boton-de-actualizacion.png" alt="Actualizar" style="height:17px;width:auto;vertical-align:middle;margin-right:4px;"> Actualizar</button>
+            </div>
+            
+            <!-- Tabs de estados -->
+            <div class="pedidos-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+                <button class="tab-btn active" data-estado="PAGADO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">PAGADOS</button>
+                <button class="tab-btn" data-estado="LISTO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">LISTOS</button>
+                <button class="tab-btn" data-estado="EN_CAMINO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">EN CAMINO</button>
+                <button class="tab-btn" data-estado="ENTREGADO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">ENTREGADOS</button>
+            </div>
+            
+            <div id="lista-pedidos" style="display: grid; gap: 12px;"></div>
+        </div>
+
+        <!-- Modal Agregar Producto -->
+        <div id="modal-agregar-producto" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200;">
+            <div class="modal-content" style="background:#fff; max-width:520px; margin:100px auto; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2); overflow:hidden;">
+                <div class="modal-header" style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:#e53e3e; color:#fff;">
+                    <h3 style="margin:0; font-size:18px;">Agregar Producto</h3>
+                    <button id="cerrar-modal" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+                </div>
+                <div class="modal-body" style="padding:16px;">
+                    <form id="form-producto" style="display:grid; gap:12px;">
+                        <div>
+                            <label for="prod-nombre" style="display:block; font-weight:600; margin-bottom:6px;">Nombre del Producto</label>
+                            <input id="prod-nombre" type="text" placeholder="Ej: Pizza Margherita" required style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                        </div>
+                        <div>
+                            <label for="prod-descripcion" style="display:block; font-weight:600; margin-bottom:6px;">Descripción (opcional)</label>
+                            <textarea id="prod-descripcion" placeholder="Descripción del producto..." style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px; resize:vertical; min-height:60px;"></textarea>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div>
+                                <label for="prod-precio" style="display:block; font-weight:600; margin-bottom:6px;">Precio ($)</label>
+                                <input id="prod-precio" type="number" min="0" step="100" placeholder="25000" required style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                            </div>
+                            <div>
+                                <label for="prod-unidades" style="display:block; font-weight:600; margin-bottom:6px;">Unidades</label>
+                                <input id="prod-unidades" type="number" min="0" step="1" placeholder="10" required style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="prod-categoria" style="display:block; font-weight:600; margin-bottom:6px;">Categoría (opcional)</label>
+                            <select id="prod-categoria" style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                                <option value="">Seleccionar categoría</option>
+                                <option value="Comida Rápida">Comida Rápida</option>
+                                <option value="Bebidas">Bebidas</option>
+                                <option value="Postres">Postres</option>
+                                <option value="Ensaladas">Ensaladas</option>
+                                <option value="Platos Principales">Platos Principales</option>
+                                <option value="Snacks">Snacks</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:4px;">
+                            <button type="button" id="cancelar" style="background:#f3f4f6;color:#374151;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">Cancelar</button>
+                            <button type="submit" id="btn-guardar" style="background:#0f6937;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">Guardar Producto</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let establecimientoId = null;
+        let productosCount = 0;
+        let pedidosInterval = null;
+
+        // Variable para almacenar el ID del intervalo de heartbeat
+        let heartbeatInterval = null;
+        
+        // Enviar heartbeat para indicar que el establecimiento está en línea
+        async function enviarHeartbeat() {
+            if (!establecimientoId) return;
+            
+            try {
+                await fetch('http://localhost/SnappyVistas/database/establecimiento_heartbeat.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        establecimiento_id: establecimientoId
+                    })
+                });
+            } catch (error) {
+                console.error('Error al enviar heartbeat:', error);
+            }
+        }
+        
+        // Limpiar heartbeat cuando el establecimiento cierra sesión
+        function limpiarHeartbeat() {
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+                console.log('Heartbeat detenido - establecimiento cerrando sesión');
+                
+                // Enviar un último heartbeat para marcar como offline
+                enviarHeartbeatOffline();
+            }
+        }
+        
+        // Enviar heartbeat offline para marcar como no disponible
+        async function enviarHeartbeatOffline() {
+            try {
+                const establecimientoId = obtenerEstablecimientoId();
+                if (!establecimientoId) {
+                    console.warn('No se pudo obtener ID del establecimiento para heartbeat offline');
+                    return;
+                }
+                
+                console.log('Enviando heartbeat offline para establecimiento:', establecimientoId);
+                
+                // Enviar una señal especial para marcar como offline
+                const response = await fetch('http://localhost/SnappyVistas/database/establecimiento_heartbeat.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        establecimiento_id: establecimientoId,
+                        offline: true 
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('Respuesta heartbeat offline:', result);
+                
+                if (result.success) {
+                    console.log('✅ Establecimiento marcado como offline exitosamente');
+                } else {
+                    console.error('❌ Error al marcar como offline:', result.error);
+                }
+            } catch (error) {
+                console.error('Error al enviar heartbeat offline:', error);
+            }
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                // Limpiar heartbeat ANTES de cerrar sesión
+                limpiarHeartbeat();
+                
+                // Limpiar datos de sesión específicos del establecimiento
+                localStorage.removeItem('snappy_establecimiento_actual');
+                localStorage.removeItem('snappy_establecimiento_tipo');
+                localStorage.removeItem('sesionEstablecimiento');
+                localStorage.removeItem('tiempoSesion');
+                
+                // Pequeño delay para asegurar que el heartbeat offline se envíe
+                setTimeout(() => {
+                    window.location.href = 'indexEstablecimiento.html';
+                }, 500);
+            }
+        }
+
+        // Obtener ID del establecimiento desde localStorage
+        function obtenerEstablecimientoId() {
+            try {
+                const usuario = JSON.parse(localStorage.getItem('snappy_establecimiento_actual') || 'null');
+                if (usuario && usuario.datos && usuario.datos.id) {
+                    return usuario.datos.id;
+                } else if (usuario && usuario.id) {
+                    // Fallback para estructura antigua
+                    return usuario.id;
+                }
+            } catch (e) {
+                console.error('Error al obtener ID del establecimiento:', e);
+            }
+            return null;
+        }
+
+        // Cargar información del establecimiento
+        async function cargarInformacionEstablecimiento() {
+            establecimientoId = obtenerEstablecimientoId();
+            if (!establecimientoId) {
+                console.error('No se pudo obtener el ID del establecimiento');
+                return;
+            }
+
+            try {
+                // Cargar productos del establecimiento
+                await cargarProductos();
+                
+            } catch (error) {
+                console.error('Error al cargar información:', error);
+            }
+        }
+
+        // Cargar productos del establecimiento
+        async function cargarProductos() {
+            if (!establecimientoId) return;
+
+            try {
+                const response = await fetch(`http://localhost/SnappyVistas/database/listar_productos.php?establecimiento_id=${establecimientoId}&solo_activos=false`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    productosCount = data.total;
+                    actualizarContadorProductos();
+                    mostrarProductos(data.data);
+                }
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+            }
+        }
+
+        // Mostrar productos en la lista
+        function mostrarProductos(productos) {
+            const listaProductos = document.getElementById('lista-productos');
+            if (!listaProductos) return;
+
+            if (productos.length === 0) {
+                listaProductos.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280; background: #f9fafb; border-radius: 8px;">
+                        <p style="margin: 0; font-size: 16px;">No tienes productos registrados</p>
+                        <p style="margin: 8px 0 0 0; font-size: 14px;">Agrega tu primer producto para comenzar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = productos.map(producto => `
+                <div class="producto-card" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="producto-info" style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <h4 style="margin: 0; color: #111827; font-size: 16px;">${producto.nombre}</h4>
+                            <span style="background: ${producto.estado == 1 ? '#dcfce7' : '#fef2f2'}; color: ${producto.estado == 1 ? '#166534' : '#dc2626'}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
+                                ${producto.estado == 1 ? 'Activo' : 'Inactivo'}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 16px; font-size: 14px; color: #6b7280;">
+                            <span><strong>Precio:</strong> $${parseInt(producto.precio).toLocaleString()}</span>
+                            <span><strong>Unidades:</strong> ${producto.unidades_disponibles}</span>
+                            ${producto.categoria ? `<span><strong>Categoría:</strong> ${producto.categoria}</span>` : ''}
+                        </div>
+                        ${producto.descripcion ? `<p style="margin: 8px 0 0 0; color: #6b7280; font-size: 14px;">${producto.descripcion}</p>` : ''}
+                    </div>
+                    <div class="producto-actions" style="display: flex; gap: 8px;">
+                        <button onclick="eliminarProducto(${producto.id}, '${producto.nombre}')" 
+                                style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                            <img src='../imagenes/basura.png' class='icono-basura' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            listaProductos.innerHTML = html;
+        }
+
+        // ==== Pedidos ====
+        let estadoActual = 'PAGADO';
+        
+        async function cargarPedidos(estado = estadoActual) {
+            if (!establecimientoId) return;
+            try {
+                const res = await fetch(`http://localhost/SnappyVistas/database/pedidos_listar.php?establecimiento_id=${establecimientoId}&estado=${estado}`);
+                const data = await res.json();
+                if (data.success) {
+                    renderPedidos(data.data || [], estado);
+                }
+            } catch (e) { console.error('Error cargando pedidos:', e); }
+        }
+
+        function renderPedidos(pedidos, estado) {
+            const cont = document.getElementById('lista-pedidos');
+            if (!cont) return;
+            if (!pedidos.length) {
+                cont.innerHTML = `<div style="text-align:center;color:#6b7280;background:#f9fafb;border-radius:8px;padding:24px;">No hay pedidos ${estado.toLowerCase()}</div>`;
+                return;
+            }
+            cont.innerHTML = pedidos.map(p => {
+                const items = (p.items || []).map(it => `${it.title} x${it.quantity}`).join(', ');
+                const datosCliente = p.datos_cliente_json ? JSON.parse(p.datos_cliente_json) : {};
+                const direccion = p.direccion_entrega || datosCliente.direccion || 'No especificada';
+                const telefono = p.telefono_cliente || datosCliente.telefono || 'No especificado';
+                
+                let botones = '';
+                if (estado === 'PAGADO') {
+                    botones = `<button onclick="marcarPedido(${p.id}, 'LISTO')" style="background:#10b981;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;"><img src='../imagenes/comprobar.png' class='icono-comprobar' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> Marcar Listo</button>`;
+                } else if (estado === 'LISTO') {
+                    botones = `<button onclick="marcarPedido(${p.id}, 'EN_CAMINO')" style="background:#3b82f6;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">🚚 Enviar</button>`;
+                }
+                
+                return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                        <div>
+                            <div style="font-weight:600;color:#111827;font-size:16px;">Pedido #${p.id}</div>
+                            <div style="color:#6b7280;font-size:13px;margin-top:4px;">${items}</div>
+                        </div>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <strong style="color:#111827;font-size:16px;">$${Number(p.total).toLocaleString('es-CO')}</strong>
+                            <span style="background:#dcfce7;color:#166534;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:500;">${p.estado}</span>
+                        </div>
+                    </div>
+                    <div style="background:#f8fafc;padding:12px;border-radius:6px;margin-bottom:12px;">
+                        <div style="font-size:13px;color:#374151;margin-bottom:4px;"><strong><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> Dirección:</strong> ${direccion}</div>
+                        <div style="font-size:13px;color:#374151;"><strong>📞 Teléfono:</strong> ${telefono}</div>
+                        ${p.notas_especiales ? `<div style="font-size:13px;color:#374151;margin-top:4px;"><strong>📝 Notas:</strong> ${p.notas_especiales}</div>` : ''}
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;">
+                        ${botones}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Eliminar producto
+        async function eliminarProducto(productoId, nombreProducto) {
+            if (!confirm(`¿Estás seguro de que quieres eliminar el producto "${nombreProducto}"?\n\nEsta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/eliminar_producto.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        producto_id: productoId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Producto eliminado exitosamente');
+                    await cargarProductos(); // Recargar la lista
+                } else {
+                    alert('Error al eliminar producto: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error al eliminar producto:', error);
+                alert('Error al eliminar producto');
+            }
+        }
+
+        // Actualizar contador de productos
+        function actualizarContadorProductos() {
+            const contador = document.getElementById('productos-total');
+            if (contador) {
+                contador.textContent = productosCount;
+            }
+        }
+
+        // Marcar pedido con nuevo estado
+        async function marcarPedido(pedidoId, nuevoEstado) {
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/actualizar_estado_pedido.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pedido_id: pedidoId,
+                        estado: nuevoEstado
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Pedido #${pedidoId} marcado como ${nuevoEstado}`);
+                    cargarPedidos(estadoActual); // Recargar pedidos del estado actual
+                } else {
+                    alert('Error al actualizar pedido: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error al marcar pedido:', error);
+                alert('Error al marcar pedido');
+            }
+        }
+
+        // Guardar producto
+        async function guardarProducto(datos) {
+            if (!establecimientoId) {
+                alert('Error: No se pudo identificar el establecimiento');
+                return false;
+            }
+
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/agregar_producto.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        establecimiento_id: establecimientoId,
+                        nombre: datos.nombre,
+                        descripcion: datos.descripcion,
+                        precio: datos.precio,
+                        unidades_disponibles: datos.unidades,
+                        categoria: datos.categoria
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    productosCount++;
+                    actualizarContadorProductos();
+                    await cargarProductos(); // Recargar la lista de productos
+                    return true;
+                } else {
+                    alert('Error al guardar producto: ' + result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error al guardar producto:', error);
+                alert('Error al guardar producto');
+                return false;
+            }
+        }
+
+        
+        // Mostrar nombre de usuario si está en localStorage (ejecutar inmediatamente)
+        (function(){
+            try {
+                const u = JSON.parse(localStorage.getItem('snappy_establecimiento_actual') || 'null');
+                if (u && u.datos && u.datos.nombre) {
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.datos.nombre;
+                } else if (u && u.nombre) {
+                    // Fallback para estructura antigua
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.nombre;
+                }
+            } catch (e) {
+                console.error('Error al cargar nombre de usuario:', e);
+            }
+        })();
+
+        // Abrir/cerrar modal
+        const modal = document.getElementById('modal-agregar-producto');
+        const btnAgregar = document.getElementById('btn-agregar-producto');
+        const btnCerrar = document.getElementById('cerrar-modal');
+        const btnCancelar = document.getElementById('cancelar');
+        const form = document.getElementById('form-producto');
+        const btnGuardar = document.getElementById('btn-guardar');
+
+        function abrirModal() {
+            if (modal) modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function cerrarModal() {
+            if (modal) modal.style.display = 'none';
+            document.body.style.overflow = '';
+            if (form) form.reset();
+        }
+
+        // Event listeners
+        if (btnAgregar) btnAgregar.addEventListener('click', abrirModal);
+        if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal);
+        if (btnCancelar) btnCancelar.addEventListener('click', cerrarModal);
+        if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
+
+        // Botón refrescar productos
+        const btnRefrescar = document.getElementById('btn-refrescar-productos');
+        if (btnRefrescar) btnRefrescar.addEventListener('click', cargarProductos);
+
+        // Manejo de envío del formulario
+        if (form) form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('prod-nombre').value.trim();
+            const descripcion = document.getElementById('prod-descripcion').value.trim();
+            const precio = parseFloat(document.getElementById('prod-precio').value);
+            const unidades = parseInt(document.getElementById('prod-unidades').value, 10);
+            const categoria = document.getElementById('prod-categoria').value.trim();
+            
+            if (!nombre || isNaN(precio) || isNaN(unidades) || precio <= 0 || unidades < 0) {
+                alert('Por favor completa todos los campos correctamente');
+                return;
+            }
+
+            // Deshabilitar botón durante el envío
+            if (btnGuardar) {
+                btnGuardar.disabled = true;
+                btnGuardar.textContent = 'Guardando...';
+            }
+
+            const exito = await guardarProducto({
+                nombre,
+                descripcion,
+                precio,
+                unidades,
+                categoria
+            });
+
+            if (exito) {
+                alert('¡Producto guardado exitosamente!');
+                cerrarModal();
+            }
+
+            // Rehabilitar botón
+            if (btnGuardar) {
+                btnGuardar.disabled = false;
+                btnGuardar.textContent = 'Guardar Producto';
+            }
+        });
+
+        // Cargar información al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarInformacionEstablecimiento();
+            
+            // Enviar heartbeat inmediatamente
+            enviarHeartbeat();
+            
+            // Enviar heartbeat cada 60 segundos y guardar el ID del intervalo
+            heartbeatInterval = setInterval(enviarHeartbeat, 60000);
+            
+            // Limpiar heartbeat cuando el usuario cierre la ventana o navegue
+            window.addEventListener('beforeunload', limpiarHeartbeat);
+            window.addEventListener('unload', limpiarHeartbeat);
+
+            // Pedidos: polling cada 8s
+            cargarPedidos();
+            pedidosInterval = setInterval(cargarPedidos, 8000);
+
+            const btnPedidos = document.getElementById('btn-refrescar-pedidos');
+            if (btnPedidos) btnPedidos.addEventListener('click', () => cargarPedidos(estadoActual));
+
+            // Manejar tabs de pedidos
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remover active de todos los tabs
+                    tabBtns.forEach(t => {
+                        t.classList.remove('active');
+                        t.style.borderBottomColor = 'transparent';
+                        t.style.color = '#6b7280';
+                    });
+                    
+                    // Activar tab seleccionado
+                    btn.classList.add('active');
+                    btn.style.borderBottomColor = '#3b82f6';
+                    btn.style.color = '#3b82f6';
+                    
+                    // Cambiar estado y cargar pedidos
+                    estadoActual = btn.getAttribute('data-estado');
+                    cargarPedidos(estadoActual);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

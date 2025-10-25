@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos Disponibles - Snappy</title>
+    <link rel="stylesheet" href="css/pedidosDisponibles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../imagenes/logo-snappy.png" alt="Logo" class="logo">
+            <span class="location"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> Popayán</span>
+
+            <div class="controls">
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+                <div class="user">
+                    <span class="user-icon"><img src="../imagenes/usuario.png" alt="Usuario" class="icono-usuario"></span>
+                    <span class="user-text">Usuario</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon"><img src="../imagenes/caja-del-paquete.png" alt="Pedidos" style="height:23px;width:auto;vertical-align:middle;margin-right:3px;"></div>
+                <div class="stat-info">
+                    <div class="stat-number" id="available-count">0</div>
+                    <div class="stat-label">Pedidos Disponibles</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div class="orders-section">
+            <div class="section-header">
+                <h2>Pedidos Disponibles</h2>
+                <button class="back-button" onclick="goBack()">← Volver</button>
+            </div>
+
+            <div class="orders-container" id="available-orders">
+                <div class="no-orders" id="no-orders-message">
+                    <div class="no-orders-icon"><img src="../imagenes/caja-del-paquete.png" alt="Pedidos" style="height:23px;width:auto;vertical-align:middle;margin-right:3px;"></div>
+                    <div class="no-orders-text">No hay pedidos disponibles en este momento</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <footer class="footer-nav">
+        <div class="nav-item active">
+            <div class="nav-icon"><img src="../imagenes/caja-del-paquete.png" alt="Pedidos" style="height:23px;width:auto;vertical-align:middle;margin-right:3px;"></div>
+            <div class="nav-text">Pedidos Disponibles</div>
+        </div>
+    </footer>
+
+    <script>
+        // Función para volver al dashboard
+        function goBack() {
+            window.location.href = 'dashboardDomiciliario.html';
+        }
+
+        // Función para cargar datos de pedidos
+        function loadOrdersData() {
+            // Aquí se conectaría con la API real para obtener los pedidos
+            // Por ahora, simulamos que no hay pedidos disponibles
+            const ordersContainer = document.getElementById('available-orders');
+            const noOrdersMessage = document.getElementById('no-orders-message');
+            const availableCount = document.getElementById('available-count');
+            
+            if (ordersContainer && noOrdersMessage && availableCount) {
+                // Mostrar mensaje de no hay pedidos
+                noOrdersMessage.style.display = 'flex';
+                availableCount.textContent = '0';
+            }
+        }
+
+        // Función para aceptar un pedido
+        function acceptOrder(orderId) {
+            // Aquí se conectaría con la API para aceptar el pedido
+            alert('Pedido ' + orderId + ' aceptado exitosamente');
+            // Recargar la lista de pedidos disponibles
+            loadOrdersData();
+        }
+
+        // Función para crear una tarjeta de pedido
+        function createOrderCard(order) {
+            const orderCard = document.createElement('div');
+            orderCard.className = 'order-card';
+            orderCard.innerHTML = `
+                <div class="order-header">
+                    <div class="order-id">#${order.id}</div>
+                    <div class="order-time">${order.time}</div>
+                </div>
+                <div class="order-details">
+                    <div class="restaurant">${order.restaurant}</div>
+                    <div class="customer">Cliente: ${order.customer}</div>
+                    <div class="address"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> ${order.address}</div>
+                    <div class="total">💰 $${order.total}</div>
+                </div>
+                <div class="order-actions">
+                    <button class="btn-accept" onclick="acceptOrder('${order.id}')">Aceptar Pedido</button>
+                </div>
+            `;
+            return orderCard;
+        }
+
+        // Función para mostrar pedidos (se llamaría cuando lleguen pedidos reales)
+        function displayOrders(orders) {
+            const ordersContainer = document.getElementById('available-orders');
+            const noOrdersMessage = document.getElementById('no-orders-message');
+            const availableCount = document.getElementById('available-count');
+            
+            if (ordersContainer && noOrdersMessage && availableCount) {
+                // Limpiar contenedor
+                ordersContainer.innerHTML = '';
+                
+                if (orders.length === 0) {
+                    // Mostrar mensaje de no hay pedidos
+                    noOrdersMessage.style.display = 'flex';
+                    ordersContainer.appendChild(noOrdersMessage);
+                    availableCount.textContent = '0';
+                } else {
+                    // Ocultar mensaje de no hay pedidos
+                    noOrdersMessage.style.display = 'none';
+                    
+                    // Mostrar pedidos
+                    orders.forEach(order => {
+                        const orderCard = createOrderCard(order);
+                        ordersContainer.appendChild(orderCard);
+                    });
+                    
+                    availableCount.textContent = orders.length;
+                }
+            }
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrdersData();
+        });
+    </script>
+</body>
+</html>

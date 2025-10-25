@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Domiciliario - Snappy</title>
+    <link rel="stylesheet" href="css/dashboardDomiciliario.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../imagenes/logo-snappy.png" alt="Logo" class="logo">
+            <span class="location"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> Popayán</span>
+
+
+            <div class="controls">
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+                <div class="user">
+                    <span class="user-icon"><img src="../imagenes/usuario.png" alt="Usuario" class="icono-usuario"></span>
+                    <span class="user-text" id="user-name">Usuario</span>
+                </div>
+                <button class="logout-btn" onclick="cerrarSesion()" title="Cerrar sesión">
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-image">
+                <img src="../imagenes/domiciliario.png" alt="Domiciliario">
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content" id="dashboard-content">
+            <div class="welcome-section" style="text-align: center; padding: 40px 20px;">
+                <h2 style="color: #374151; margin-bottom: 16px;">¡Bienvenido, Domiciliario!</h2>
+                <p style="color: #6b7280; margin-bottom: 24px;">Gestiona tus pedidos y mantén a los clientes satisfechos</p>
+                
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div class="stat-card" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;">
+                        <div style="font-size: 24px; font-weight: bold; color: #3b82f6;" id="pedidos-disponibles">0</div>
+                        <div style="color: #6b7280; font-size: 14px;">Pedidos Disponibles</div>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;">
+                        <div style="font-size: 24px; font-weight: bold; color: #10b981;" id="pedidos-activos">0</div>
+                        <div style="color: #6b7280; font-size: 14px;">Pedidos Activos</div>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;">
+                        <div style="font-size: 24px; font-weight: bold; color: #f59e0b;" id="ganancias-hoy">$0</div>
+                        <div style="color: #6b7280; font-size: 14px;">Ganancias Hoy</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button id="btn-cargar-pedidos" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500;">
+                        📦 Ver Pedidos Disponibles
+                    </button>
+                    <button id="btn-cargar-activos" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500;">
+                        🚚 Mis Pedidos Activos
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Lista de pedidos disponibles -->
+            <div id="lista-pedidos" style="display: none; max-width: 800px; margin: 0 auto; padding: 0 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #374151; margin: 0;">Pedidos Disponibles</h3>
+                    <button id="btn-refrescar" style="background: #6b7280; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;"><img src="../imagenes/boton-de-actualizacion.png" alt="Actualizar" style="height:17px;width:auto;vertical-align:middle;margin-right:4px;"> Actualizar</button>
+                </div>
+                <div id="pedidos-container" style="display: grid; gap: 16px;"></div>
+            </div>
+
+            <!-- Lista de pedidos activos -->
+            <div id="lista-pedidos-activos" style="display: none; max-width: 800px; margin: 0 auto; padding: 0 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #374151; margin: 0;">Mis Pedidos Activos</h3>
+                    <button id="btn-refrescar-activos" style="background: #6b7280; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;"><img src="../imagenes/boton-de-actualizacion.png" alt="Actualizar" style="height:17px;width:auto;vertical-align:middle;margin-right:4px;"> Actualizar</button>
+                </div>
+                <div id="pedidos-activos-container" style="display: grid; gap: 16px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <footer class="footer-nav">
+        <div class="nav-item active">
+            <div class="nav-icon"><img src="../imagenes/caja-del-paquete.png" alt="Pedidos" style="height:16px;width:auto;vertical-align:middle;margin-right:3px;"></div>
+            <div class="nav-text">Pedidos Disponibles</div>
+        </div>
+    </footer>
+
+    <script>
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                // Limpiar datos de sesión
+                localStorage.removeItem('snappy_usuario_actual');
+                localStorage.removeItem('snappy_tipo_usuario');
+                localStorage.removeItem('sesionDomiciliario');
+                localStorage.removeItem('tiempoSesionDomiciliario');
+                
+                // Redirigir a la página index de domiciliario
+                window.location.href = 'indexDomiciliario.html';
+            }
+        }
+
+        
+        // Mostrar nombre de usuario si está en localStorage (ejecutar inmediatamente)
+        (function(){
+            try {
+                const u = JSON.parse(localStorage.getItem('snappy_usuario_actual') || 'null');
+                if (u && u.datos && u.datos.nombre) {
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.datos.nombre;
+                } else if (u && u.nombre) {
+                    // Fallback para estructura antigua
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.nombre;
+                }
+            } catch (e) {
+                console.error('Error al cargar nombre de usuario:', e);
+            }
+        })();
+
+        // Variables globales
+        let domiciliarioId = null;
+        let pedidosInterval = null;
+
+        // Obtener ID del domiciliario desde localStorage
+        function obtenerDomiciliarioId() {
+            try {
+                // Buscar en la clave correcta que usa el sistema de login
+                const usuario = JSON.parse(localStorage.getItem('snappy_usuario_actual') || 'null');
+                if (usuario && usuario.datos && usuario.datos.id) {
+                    return usuario.datos.id;
+                } else if (usuario && usuario.id) {
+                    return usuario.id;
+                }
+            } catch (e) {
+                console.error('Error al obtener ID del domiciliario:', e);
+            }
+            return null;
+        }
+
+        // Cargar pedidos disponibles
+        async function cargarPedidosDisponibles() {
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/pedidos_listar.php?estado=LISTO');
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarPedidos(data.data || []);
+                    actualizarEstadisticas();
+                }
+            } catch (error) {
+                console.error('Error cargando pedidos:', error);
+            }
+        }
+
+        // Cargar pedidos activos del domiciliario
+        async function cargarPedidosActivos() {
+            if (!domiciliarioId) {
+                alert('Error: No se pudo identificar al domiciliario');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost/SnappyVistas/database/pedidos_listar.php?domiciliario_id=${domiciliarioId}&estado=EN_CAMINO`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarPedidosActivos(data.data || []);
+                    actualizarEstadisticas();
+                }
+            } catch (error) {
+                console.error('Error cargando pedidos activos:', error);
+            }
+        }
+
+        // Mostrar pedidos en la interfaz
+        function mostrarPedidos(pedidos) {
+            const container = document.getElementById('pedidos-container');
+            if (!container) return;
+
+            if (pedidos.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280; background: #f9fafb; border-radius: 8px;">
+                        <p style="margin: 0; font-size: 16px;">No hay pedidos disponibles en este momento</p>
+                        <p style="margin: 8px 0 0 0; font-size: 14px;">Los pedidos aparecerán aquí cuando estén listos para entrega</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = pedidos.map(pedido => {
+                const items = (pedido.items || []).map(it => `${it.title} x${it.quantity}`).join(', ');
+                const datosCliente = pedido.datos_cliente_json ? JSON.parse(pedido.datos_cliente_json) : {};
+                const direccion = pedido.direccion_entrega || datosCliente.direccion || 'No especificada';
+                const telefono = pedido.telefono_cliente || datosCliente.telefono || 'No especificado';
+                
+                return `
+                    <div class="pedido-card" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <div>
+                                <h4 style="margin: 0; color: #111827; font-size: 18px;">Pedido #${pedido.id}</h4>
+                                <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${items}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 20px; font-weight: bold; color: #111827;">$${Number(pedido.total).toLocaleString('es-CO')}</div>
+                                <div style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-top: 4px;">${pedido.estado}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> DIRECCIÓN</div>
+                                    <div style="font-size: 14px; color: #374151; font-weight: 500;">${direccion}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">📞 TELÉFONO</div>
+                                    <div style="font-size: 14px; color: #374151; font-weight: 500;">${telefono}</div>
+                                </div>
+                            </div>
+                            ${pedido.notas_especiales ? `
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">📝 NOTAS ESPECIALES</div>
+                                    <div style="font-size: 14px; color: #374151;">${pedido.notas_especiales}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button onclick="aceptarPedido(${pedido.id})" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                                <img src='../imagenes/comprobar.png' class='icono-comprobar' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> Aceptar Pedido
+                            </button>
+                            <button onclick="verDetalles(${pedido.id})" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                                👁️ Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Aceptar pedido
+        async function aceptarPedido(pedidoId) {
+            if (!domiciliarioId) {
+                alert('Error: No se pudo identificar al domiciliario');
+                return;
+            }
+
+            if (!confirm('¿Estás seguro de que quieres aceptar este pedido?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/aceptar_pedido.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pedido_id: pedidoId,
+                        domiciliario_id: domiciliarioId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('¡Pedido aceptado exitosamente!');
+                    cargarPedidosDisponibles(); // Recargar lista
+                } else {
+                    alert('Error al aceptar pedido: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error al aceptar pedido:', error);
+                alert('Error al aceptar pedido');
+            }
+        }
+
+        // Mostrar pedidos activos en la interfaz
+        function mostrarPedidosActivos(pedidos) {
+            const container = document.getElementById('pedidos-activos-container');
+            if (!container) return;
+
+            if (pedidos.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280; background: #f9fafb; border-radius: 8px;">
+                        <p style="margin: 0; font-size: 16px;">No tienes pedidos activos en este momento</p>
+                        <p style="margin: 8px 0 0 0; font-size: 14px;">Los pedidos que aceptes aparecerán aquí</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = pedidos.map(pedido => {
+                const items = (pedido.items || []).map(it => `${it.title} x${it.quantity}`).join(', ');
+                const datosCliente = pedido.datos_cliente_json ? JSON.parse(pedido.datos_cliente_json) : {};
+                const direccion = pedido.direccion_entrega || datosCliente.direccion || 'No especificada';
+                const telefono = pedido.telefono_cliente || datosCliente.telefono || 'No especificado';
+                
+                return `
+                    <div class="pedido-card" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <div>
+                                <h4 style="margin: 0; color: #111827; font-size: 18px;">Pedido #${pedido.id}</h4>
+                                <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${items}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 20px; font-weight: bold; color: #111827;">$${Number(pedido.total).toLocaleString('es-CO')}</div>
+                                <div style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-top: 4px;">${pedido.estado}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> DIRECCIÓN</div>
+                                    <div style="font-size: 14px; color: #374151; font-weight: 500;">${direccion}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">📞 TELÉFONO</div>
+                                    <div style="font-size: 14px; color: #374151; font-weight: 500;">${telefono}</div>
+                                </div>
+                            </div>
+                            ${pedido.notas_especiales ? `
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">📝 NOTAS ESPECIALES</div>
+                                    <div style="font-size: 14px; color: #374151;">${pedido.notas_especiales}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button onclick="marcarComoEntregado(${pedido.id})" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                                <img src='../imagenes/comprobar.png' class='icono-comprobar' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> Marcar como Entregado
+                            </button>
+                            <button onclick="verDetalles(${pedido.id})" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                                👁️ Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Marcar pedido como entregado
+        async function marcarComoEntregado(pedidoId) {
+            if (!confirm('¿Confirmas que has entregado este pedido al cliente?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost/SnappyVistas/database/actualizar_estado_pedido.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pedido_id: pedidoId,
+                        estado: 'ENTREGADO'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('¡Pedido marcado como entregado exitosamente!');
+                    cargarPedidosActivos(); // Recargar lista de pedidos activos
+                    actualizarEstadisticas(); // Actualizar contadores
+                } else {
+                    alert('Error al marcar pedido como entregado: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error al marcar pedido como entregado:', error);
+                alert('Error al marcar pedido como entregado');
+            }
+        }
+
+        // Ver detalles del pedido
+        function verDetalles(pedidoId) {
+            alert(`Detalles del pedido #${pedidoId}\n\nEsta funcionalidad se puede expandir para mostrar más información.`);
+        }
+
+        // Actualizar estadísticas
+        async function actualizarEstadisticas() {
+            try {
+                // Pedidos disponibles
+                const responseDisponibles = await fetch('http://localhost/SnappyVistas/database/pedidos_listar.php?estado=LISTO');
+                const dataDisponibles = await responseDisponibles.json();
+                
+                // Pedidos activos del domiciliario
+                const responseActivos = await fetch(`http://localhost/SnappyVistas/database/pedidos_listar.php?domiciliario_id=${domiciliarioId}&estado=EN_CAMINO`);
+                const dataActivos = await responseActivos.json();
+                
+                // Actualizar contadores
+                const pedidosDisponibles = document.getElementById('pedidos-disponibles');
+                const pedidosActivos = document.getElementById('pedidos-activos');
+                
+                if (pedidosDisponibles) {
+                    pedidosDisponibles.textContent = dataDisponibles.success ? dataDisponibles.data.length : 0;
+                }
+                
+                if (pedidosActivos) {
+                    pedidosActivos.textContent = dataActivos.success ? dataActivos.data.length : 0;
+                }
+                
+            } catch (error) {
+                console.error('Error actualizando estadísticas:', error);
+            }
+        }
+
+        // Navegación del footer
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener ID del domiciliario
+            domiciliarioId = obtenerDomiciliarioId();
+            
+            if (!domiciliarioId) {
+                alert('Error: No se pudo identificar al domiciliario');
+                return;
+            }
+
+            // Event listeners
+            const btnCargarPedidos = document.getElementById('btn-cargar-pedidos');
+            const btnCargarActivos = document.getElementById('btn-cargar-activos');
+            const btnRefrescar = document.getElementById('btn-refrescar');
+            const btnRefrescarActivos = document.getElementById('btn-refrescar-activos');
+            const navItem = document.querySelector('.nav-item');
+            
+            if (btnCargarPedidos) {
+                btnCargarPedidos.addEventListener('click', function() {
+                    const welcomeSection = document.querySelector('.welcome-section');
+                    const listaPedidos = document.getElementById('lista-pedidos');
+                    const listaPedidosActivos = document.getElementById('lista-pedidos-activos');
+                    
+                    if (welcomeSection) welcomeSection.style.display = 'none';
+                    if (listaPedidos) listaPedidos.style.display = 'block';
+                    if (listaPedidosActivos) listaPedidosActivos.style.display = 'none';
+                    
+                    cargarPedidosDisponibles();
+                });
+            }
+
+            if (btnCargarActivos) {
+                btnCargarActivos.addEventListener('click', function() {
+                    const welcomeSection = document.querySelector('.welcome-section');
+                    const listaPedidos = document.getElementById('lista-pedidos');
+                    const listaPedidosActivos = document.getElementById('lista-pedidos-activos');
+                    
+                    if (welcomeSection) welcomeSection.style.display = 'none';
+                    if (listaPedidos) listaPedidos.style.display = 'none';
+                    if (listaPedidosActivos) listaPedidosActivos.style.display = 'block';
+                    
+                    cargarPedidosActivos();
+                });
+            }
+            
+            if (btnRefrescar) {
+                btnRefrescar.addEventListener('click', cargarPedidosDisponibles);
+            }
+
+            if (btnRefrescarActivos) {
+                btnRefrescarActivos.addEventListener('click', cargarPedidosActivos);
+            }
+            
+            if (navItem) {
+                navItem.addEventListener('click', function() {
+                    // Redirigir a la página de pedidos disponibles
+                    window.location.href = 'pedidosDisponibles.html';
+                });
+            }
+
+            // Cargar estadísticas iniciales
+            actualizarEstadisticas();
+            
+            // Actualizar cada 30 segundos
+            pedidosInterval = setInterval(() => {
+                actualizarEstadisticas();
+                if (document.getElementById('lista-pedidos').style.display !== 'none') {
+                    cargarPedidosDisponibles();
+                }
+                if (document.getElementById('lista-pedidos-activos').style.display !== 'none') {
+                    cargarPedidosActivos();
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snappy - Iniciar Sesión Establecimiento</title>
+    <link rel="stylesheet" href="css\inicioEstablecimiento.css">
+</head>
+<body>
+    <!-- Encabezado -->
+    <header class="encabezado">
+        <div class="logo">
+            <img src="..\imagenes/logo-snappy.png" alt="Snappy" class="imagen-logo-header">
+        </div>
+    </header>
+
+    <!-- Vista de Login -->
+    <main class="contenedor-formulario">
+        <div class="modal-formulario login aparicion-gradual">
+            <button class="boton-cerrar" onclick="volverASeleccion()">✕</button>
+            <h2 class="titulo-formulario">Iniciar Sesión Establecimiento</h2>
+            
+            <div id="contenedor-mensajes-login" class="contenedor-mensajes"></div>
+            
+            <form id="formulario-login" class="formulario-login">
+                <div class="grupo-formulario">
+                    <input 
+                        type="email" 
+                        class="entrada-formulario entrada-correo-login" 
+                        id="correo-login" 
+                        name="correoLogin"
+                        placeholder="Correo Establecimiento" 
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                <div class="grupo-formulario">
+                    <input 
+                        type="password" 
+                        class="entrada-formulario entrada-contrasena-login" 
+                        id="contrasena-login" 
+                        name="contrasenaLogin"
+                        placeholder="Contraseña" 
+                        required
+                        autocomplete="current-password"
+                        minlength="6"
+                    >
+                </div>
+                <button type="submit" class="boton-iniciar-sesion">
+                    Iniciar sesión
+                </button>
+            </form>
+            
+        </div>
+    </main>
+
+    <script>
+        // Variables específicas de la vista de login
+        let intentosLogin = 0;
+        const maxIntentosLogin = 3;
+
+        // Función para validar correo electrónico
+        function validarCorreoElectronico(correo) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(correo);
+        }
+
+        // Función para volver a la selección
+        function volverASeleccion() {
+            if (confirm('¿Deseas volver al menú principal?')) {
+                window.location.href = 'seleccionEstablecimiento.html';
+            }
+        }
+
+
+        // Validación en tiempo real para login
+        function configurarValidacionLogin() {
+            const entradaCorreo = document.getElementById('correo-login');
+            const entradaContrasena = document.getElementById('contrasena-login');
+            
+            entradaCorreo.addEventListener('input', function() {
+                validarCampoLogin(this, 'correo');
+            });
+            
+            entradaCorreo.addEventListener('blur', function() {
+                validarCampoLogin(this, 'correo');
+            });
+            
+            entradaContrasena.addEventListener('input', function() {
+                validarCampoLogin(this, 'contrasena');
+            });
+            
+            entradaContrasena.addEventListener('blur', function() {
+                validarCampoLogin(this, 'contrasena');
+            });
+        }
+
+        // Validar campo específico de login
+        function validarCampoLogin(campo, tipo) {
+            const valor = campo.value.trim();
+            let esValido = true;
+
+            // Limpiar clases previas
+            campo.classList.remove('entrada-login-valida', 'entrada-login-invalida');
+
+            if (valor.length === 0) {
+                return true; // No validar campos vacíos hasta que se envíe el formulario
+            }
+
+            switch(tipo) {
+                case 'correo':
+                    esValido = validarCorreoElectronico(valor);
+                    break;
+                case 'contrasena':
+                    esValido = valor.length >= 6;
+                    break;
+            }
+
+            // Aplicar clase visual
+            campo.classList.add(esValido ? 'entrada-login-valida' : 'entrada-login-invalida');
+            
+            return esValido;
+        }
+
+        // Manejo del formulario de login
+        document.getElementById('formulario-login').addEventListener('submit', function(evento) {
+            evento.preventDefault();
+            
+            // Verificar intentos máximos
+            if (intentosLogin >= maxIntentosLogin) {
+                mostrarMensajeLogin('Demasiados intentos fallidos. Por favor, recupera tu contraseña.', 'error');
+                return;
+            }
+            
+            const botonEnvio = this.querySelector('.boton-iniciar-sesion');
+            const datosLogin = {
+                correoEstablecimiento: document.getElementById('correo-login').value.trim(),
+                contrasenaEstablecimiento: document.getElementById('contrasena-login').value
+            };
+
+            // Validar campos
+            const correoValido = validarCampoLogin(document.getElementById('correo-login'), 'correo');
+            const contrasenaValida = validarCampoLogin(document.getElementById('contrasena-login'), 'contrasena');
+            
+            if (!correoValido) {
+                mostrarMensajeLogin('Por favor ingresa un correo electrónico válido', 'error');
+                document.getElementById('correo-login').focus();
+                return;
+            }
+
+            if (!contrasenaValida) {
+                mostrarMensajeLogin('La contraseña debe tener al menos 6 caracteres', 'error');
+                document.getElementById('contrasena-login').focus();
+                return;
+            }
+
+            // Estado de carga
+            botonEnvio.classList.add('boton-login-cargando');
+            botonEnvio.disabled = true;
+
+            // Backend login
+            fetch('http://localhost/SnappyVistas/database/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    correo: datosLogin.correoEstablecimiento,
+                    password: datosLogin.contrasenaEstablecimiento,
+                    tipo_usuario: 'ESTABLECIMIENTO'
+                })
+            })
+            .then(async (r) => {
+                const data = await r.json().catch(() => ({}));
+                if (!r.ok || !data.success) throw new Error(data.error || 'Credenciales inválidas');
+                // Guardar sesión local con clave específica para establecimiento
+                try {
+                    localStorage.setItem('snappy_establecimiento_actual', JSON.stringify(data.data));
+                    localStorage.setItem('snappy_establecimiento_tipo', 'ESTABLECIMIENTO');
+                } catch (e) {}
+                mostrarMensajeLogin('Iniciando sesión...', 'exito');
+                setTimeout(() => { window.location.href = 'dashboardEstablecimiento.html'; }, 1000);
+            })
+            .catch((e) => {
+                intentosLogin++;
+                const intentosRestantes = maxIntentosLogin - intentosLogin;
+                const base = e.message || 'Error al iniciar sesión';
+                mostrarMensajeLogin(intentosRestantes > 0 ? `${base}. Te quedan ${intentosRestantes} intentos.` : base, 'error');
+                if (intentosRestantes <= 0) {
+                    botonEnvio.disabled = true;
+                    document.getElementById('correo-login').disabled = true;
+                    document.getElementById('contrasena-login').disabled = true;
+                }
+            })
+            .finally(() => {
+                botonEnvio.classList.remove('boton-login-cargando');
+                botonEnvio.disabled = false;
+            });
+        });
+
+        // Función para mostrar mensajes específicos de login
+        function mostrarMensajeLogin(mensaje, tipo) {
+            const contenedor = document.getElementById('contenedor-mensajes-login');
+            let claseCSS = tipo === 'error' ? 'mensaje-error' : 'mensaje-exito';
+            
+            if (tipo === 'error' && intentosLogin >= maxIntentosLogin - 1) {
+                claseCSS = 'error-autenticacion';
+            }
+            
+            contenedor.innerHTML = `<div class="${claseCSS}">${mensaje}</div>`;
+            
+            // Limpiar mensaje después de tiempo apropiado
+            const tiempoLimpieza = tipo === 'error' ? 8000 : 3000;
+            setTimeout(() => {
+                if (tipo !== 'exito') { // No limpiar mensajes de éxito
+                    contenedor.innerHTML = '';
+                }
+            }, tiempoLimpieza);
+        }
+
+
+        // Inicializar vista
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Vista de login cargada');
+            configurarValidacionLogin();
+            
+            // Sin datos de demo
+        });
+    </script>
+</body>
+</html>

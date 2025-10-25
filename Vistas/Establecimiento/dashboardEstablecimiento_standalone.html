@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Establecimiento - Snappy</title>
+    <link rel="stylesheet" href="css/dashboardEstablecimiento.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <span class="location"><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion" style="height:17px;width:auto;vertical-align:middle;margin-right:5px;"> Popayán</span>
+            <div class="logo-container">
+                <img src="../imagenes/logo-snappy.png" alt="Logo" class="logo">
+            </div>
+            <div class="controls">
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+                <div class="user">
+                    <span class="user-icon"><img src="../imagenes/establecimiento_1.png" alt="Establecimiento" style="height:19px;width:auto;vertical-align:middle;margin-right:4px;"></span>
+                    <span class="user-text" id="user-name">Establecimiento</span>
+                </div>
+                <button class="logout-btn" onclick="cerrarSesion()" title="Cerrar sesión">
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="panel-actions" style="max-width: 960px; margin: 90px auto 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="establecimiento-info" style="display: flex; align-items: center; gap: 15px;">
+                <div class="productos-count" id="productos-count" style="padding: 8px 12px; background: #f3f4f6; border-radius: 20px; font-size: 14px; color: #374151;">
+                    <span id="productos-total">0</span> productos
+                </div>
+            </div>
+            <div class="action-buttons" style="display: flex; gap: 10px;">
+                <button id="btn-agregar-producto" class="btn-accion" style="background:#e53e3e;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">Agregar Producto</button>
+            </div>
+        </div>
+
+        <!-- Lista de Productos -->
+        <div class="productos-section" style="max-width: 960px; margin: 20px auto; padding: 0 20px;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #374151; font-size: 18px;">Mis Productos</h3>
+                <button id="btn-refrescar-productos" style="background: #6b7280; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;"><img src="../imagenes/boton-de-actualizacion.png" alt="Actualizar" style="height:17px;width:auto;vertical-align:middle;margin-right:4px;"> Actualizar</button>
+            </div>
+            <div id="lista-productos" style="display: grid; gap: 12px;">
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Pedidos -->
+        <div class="pedidos-section" style="max-width: 960px; margin: 30px auto; padding: 0 20px;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="margin: 0; color: #374151; font-size: 18px;">Gestión de Pedidos</h3>
+                <button id="btn-refrescar-pedidos" style="background: #2563eb; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;"><img src="../imagenes/boton-de-actualizacion.png" alt="Actualizar" style="height:17px;width:auto;vertical-align:middle;margin-right:4px;"> Actualizar</button>
+            </div>
+            
+            <!-- Tabs de estados -->
+            <div class="pedidos-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+                <button class="tab-btn active" data-estado="PAGADO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">PAGADOS</button>
+                <button class="tab-btn" data-estado="LISTO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">LISTOS</button>
+                <button class="tab-btn" data-estado="EN_CAMINO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">EN CAMINO</button>
+                <button class="tab-btn" data-estado="ENTREGADO" style="padding: 8px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">ENTREGADOS</button>
+            </div>
+            
+            <div id="lista-pedidos" style="display: grid; gap: 12px;"></div>
+        </div>
+
+        <!-- Modal Agregar Producto -->
+        <div id="modal-agregar-producto" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200;">
+            <div class="modal-content" style="background:#fff; max-width:520px; margin:100px auto; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2); overflow:hidden;">
+                <div class="modal-header" style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:#e53e3e; color:#fff;">
+                    <h3 style="margin:0; font-size:18px;">Agregar Producto</h3>
+                    <button id="cerrar-modal" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+                </div>
+                <div class="modal-body" style="padding:16px;">
+                    <form id="form-producto" style="display:grid; gap:12px;">
+                        <div>
+                            <label for="prod-nombre" style="display:block; font-weight:600; margin-bottom:6px;">Nombre del Producto</label>
+                            <input id="prod-nombre" type="text" placeholder="Ej: Pizza Margherita" required style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                        </div>
+                        <div>
+                            <label for="prod-descripcion" style="display:block; font-weight:600; margin-bottom:6px;">Descripción (opcional)</label>
+                            <textarea id="prod-descripcion" placeholder="Descripción del producto..." style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px; resize:vertical; min-height:60px;"></textarea>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div>
+                                <label for="prod-precio" style="display:block; font-weight:600; margin-bottom:6px;">Precio ($)</label>
+                                <input id="prod-precio" type="number" min="0" step="100" placeholder="25000" required style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                            </div>
+                            <div>
+                                <label for="prod-unidades" style="display:block; font-weight:600; margin-bottom:6px;">Unidades</label>
+                                <input id="prod-unidades" type="number" min="0" step="1" placeholder="10" required style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="prod-categoria" style="display:block; font-weight:600; margin-bottom:6px;">Categoría (opcional)</label>
+                            <select id="prod-categoria" style="width:100%; padding:10px 12px; border:1px solid #e6e6e6; border-radius:8px;">
+                                <option value="">Seleccionar categoría</option>
+                                <option value="Comida Rápida">Comida Rápida</option>
+                                <option value="Bebidas">Bebidas</option>
+                                <option value="Postres">Postres</option>
+                                <option value="Ensaladas">Ensaladas</option>
+                                <option value="Platos Principales">Platos Principales</option>
+                                <option value="Snacks">Snacks</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:4px;">
+                            <button type="button" id="cancelar" style="background:#f3f4f6;color:#374151;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">Cancelar</button>
+                            <button type="submit" id="btn-guardar" style="background:#0f6937;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">Guardar Producto</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let establecimientoId = 4; // ID fijo para demo
+        let productosCount = 0;
+        let pedidosInterval = null;
+        let estadoActual = 'PAGADO';
+
+        // Datos de ejemplo para pedidos
+        const pedidosEjemplo = [
+            {
+                id: 20,
+                establecimiento_id: 4,
+                total: 15000,
+                estado: 'PAGADO',
+                preference_id: '2936834690-9e9803ed-4160-44b3-a495-f95290d56178',
+                domiciliario_id: null,
+                datos_cliente_json: null,
+                direccion_entrega: 'Calle 5 #10-20, Popayán',
+                telefono_cliente: '3001234567',
+                notas_especiales: 'Entregar en la puerta principal',
+                created_at: '2025-10-22 19:11:26',
+                updated_at: '2025-10-22 19:15:32',
+                items: [
+                    {
+                        title: 'Malteada de chocolate',
+                        description: '',
+                        quantity: 1,
+                        unit_price: 15000,
+                        currency_id: 'COP'
+                    }
+                ]
+            }
+        ];
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                window.location.href = 'indexEstablecimiento.html';
+            }
+        }
+
+        // Cargar productos del establecimiento (simulado)
+        async function cargarProductos() {
+            // Simular carga de productos
+            const productos = [
+                {
+                    id: 1,
+                    nombre: 'Café en leche',
+                    precio: 12000,
+                    unidades_disponibles: 40,
+                    categoria: 'Bebidas',
+                    descripcion: 'Café en leche, vaso grande',
+                    estado: 1
+                },
+                {
+                    id: 2,
+                    nombre: 'Malteada de chocolate',
+                    precio: 15000,
+                    unidades_disponibles: 20,
+                    categoria: 'Bebidas',
+                    descripcion: 'Deli malteada de chocolate',
+                    estado: 1
+                },
+                {
+                    id: 3,
+                    nombre: 'Café Capucho',
+                    precio: 9000,
+                    unidades_disponibles: 50,
+                    categoria: 'Bebidas',
+                    descripcion: 'Café capuccino grande',
+                    estado: 1
+                }
+            ];
+
+            productosCount = productos.length;
+            actualizarContadorProductos();
+            mostrarProductos(productos);
+        }
+
+        // Mostrar productos en la lista
+        function mostrarProductos(productos) {
+            const listaProductos = document.getElementById('lista-productos');
+            if (!listaProductos) return;
+
+            if (productos.length === 0) {
+                listaProductos.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280; background: #f9fafb; border-radius: 8px;">
+                        <p style="margin: 0; font-size: 16px;">No tienes productos registrados</p>
+                        <p style="margin: 8px 0 0 0; font-size: 14px;">Agrega tu primer producto para comenzar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = productos.map(producto => `
+                <div class="producto-card" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="producto-info" style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <h4 style="margin: 0; color: #111827; font-size: 16px;">${producto.nombre}</h4>
+                            <span style="background: ${producto.estado == 1 ? '#dcfce7' : '#fef2f2'}; color: ${producto.estado == 1 ? '#166534' : '#dc2626'}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
+                                ${producto.estado == 1 ? 'Activo' : 'Inactivo'}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 16px; font-size: 14px; color: #6b7280;">
+                            <span><strong>Precio:</strong> $${parseInt(producto.precio).toLocaleString()}</span>
+                            <span><strong>Unidades:</strong> ${producto.unidades_disponibles}</span>
+                            ${producto.categoria ? `<span><strong>Categoría:</strong> ${producto.categoria}</span>` : ''}
+                        </div>
+                        ${producto.descripcion ? `<p style="margin: 8px 0 0 0; color: #6b7280; font-size: 14px;">${producto.descripcion}</p>` : ''}
+                    </div>
+                    <div class="producto-actions" style="display: flex; gap: 8px;">
+                        <button onclick="eliminarProducto(${producto.id}, '${producto.nombre}')" 
+                                style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                            <img src='../imagenes/basura.png' class='icono-basura' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            listaProductos.innerHTML = html;
+        }
+
+        // Cargar pedidos (simulado)
+        async function cargarPedidos(estado = estadoActual) {
+            // Filtrar pedidos por estado
+            const pedidosFiltrados = pedidosEjemplo.filter(p => p.estado === estado);
+            renderPedidos(pedidosFiltrados, estado);
+        }
+
+        // Renderizar pedidos
+        function renderPedidos(pedidos, estado) {
+            const cont = document.getElementById('lista-pedidos');
+            if (!cont) return;
+            if (!pedidos.length) {
+                cont.innerHTML = `<div style="text-align:center;color:#6b7280;background:#f9fafb;border-radius:8px;padding:24px;">No hay pedidos ${estado.toLowerCase()}</div>`;
+                return;
+            }
+            cont.innerHTML = pedidos.map(p => {
+                const items = (p.items || []).map(it => `${it.title} x${it.quantity}`).join(', ');
+                const datosCliente = p.datos_cliente_json ? JSON.parse(p.datos_cliente_json) : {};
+                const direccion = p.direccion_entrega || datosCliente.direccion || 'No especificada';
+                const telefono = p.telefono_cliente || datosCliente.telefono || 'No especificado';
+                
+                let botones = '';
+                if (estado === 'PAGADO') {
+                    botones = `<button onclick="marcarPedido(${p.id}, 'LISTO')" style="background:#10b981;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;"><img src='../imagenes/comprobar.png' class='icono-comprobar' style='height:16px;width:auto;vertical-align:middle;margin-right:3px;'> Marcar Listo</button>`;
+                } else if (estado === 'LISTO') {
+                    botones = `<button onclick="marcarPedido(${p.id}, 'EN_CAMINO')" style="background:#3b82f6;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">🚚 Enviar</button>`;
+                }
+                
+                return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                        <div>
+                            <div style="font-weight:600;color:#111827;font-size:16px;">Pedido #${p.id}</div>
+                            <div style="color:#6b7280;font-size:13px;margin-top:4px;">${items}</div>
+                        </div>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <strong style="color:#111827;font-size:16px;">$${Number(p.total).toLocaleString('es-CO')}</strong>
+                            <span style="background:#dcfce7;color:#166534;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:500;">${p.estado}</span>
+                        </div>
+                    </div>
+                    <div style="background:#f8fafc;padding:12px;border-radius:6px;margin-bottom:12px;">
+                        <div style="font-size:13px;color:#374151;margin-bottom:4px;"><strong><img src="../imagenes/locacion.png" alt="Ubicación" class="icono-locacion"> Dirección:</strong> ${direccion}</div>
+                        <div style="font-size:13px;color:#374151;"><strong>📞 Teléfono:</strong> ${telefono}</div>
+                        ${p.notas_especiales ? `<div style="font-size:13px;color:#374151;margin-top:4px;"><strong>📝 Notas:</strong> ${p.notas_especiales}</div>` : ''}
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;">
+                        ${botones}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Marcar pedido con nuevo estado
+        function marcarPedido(pedidoId, nuevoEstado) {
+            // Buscar el pedido en el array
+            const pedidoIndex = pedidosEjemplo.findIndex(p => p.id === pedidoId);
+            if (pedidoIndex !== -1) {
+                pedidosEjemplo[pedidoIndex].estado = nuevoEstado;
+                pedidosEjemplo[pedidoIndex].updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                
+                alert(`Pedido #${pedidoId} marcado como ${nuevoEstado}`);
+                cargarPedidos(estadoActual); // Recargar pedidos del estado actual
+            }
+        }
+
+        // Eliminar producto (simulado)
+        function eliminarProducto(productoId, nombreProducto) {
+            if (confirm(`¿Estás seguro de que quieres eliminar el producto "${nombreProducto}"?\n\nEsta acción no se puede deshacer.`)) {
+                alert('Producto eliminado exitosamente (simulado)');
+                cargarProductos(); // Recargar la lista
+            }
+        }
+
+        // Actualizar contador de productos
+        function actualizarContadorProductos() {
+            const contador = document.getElementById('productos-total');
+            if (contador) {
+                contador.textContent = productosCount;
+            }
+        }
+
+        // Mostrar nombre de usuario
+        (function(){
+            try {
+                const u = JSON.parse(localStorage.getItem('snappy_establecimiento_actual') || 'null');
+                if (u && u.datos && u.datos.nombre) {
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.datos.nombre;
+                } else if (u && u.nombre) {
+                    const el = document.getElementById('user-name');
+                    if (el) el.textContent = u.nombre;
+                }
+            } catch (e) {
+                console.error('Error al cargar nombre de usuario:', e);
+            }
+        })();
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar datos iniciales
+            cargarProductos();
+            cargarPedidos();
+
+            // Botón refrescar productos
+            const btnRefrescar = document.getElementById('btn-refrescar-productos');
+            if (btnRefrescar) btnRefrescar.addEventListener('click', cargarProductos);
+
+            // Botón refrescar pedidos
+            const btnPedidos = document.getElementById('btn-refrescar-pedidos');
+            if (btnPedidos) btnPedidos.addEventListener('click', () => cargarPedidos(estadoActual));
+
+            // Manejar tabs de pedidos
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remover active de todos los tabs
+                    tabBtns.forEach(t => {
+                        t.classList.remove('active');
+                        t.style.borderBottomColor = 'transparent';
+                        t.style.color = '#6b7280';
+                    });
+                    
+                    // Activar tab seleccionado
+                    btn.classList.add('active');
+                    btn.style.borderBottomColor = '#3b82f6';
+                    btn.style.color = '#3b82f6';
+                    
+                    // Cambiar estado y cargar pedidos
+                    estadoActual = btn.getAttribute('data-estado');
+                    cargarPedidos(estadoActual);
+                });
+            });
+
+            // Modal de agregar producto
+            const modal = document.getElementById('modal-agregar-producto');
+            const btnAgregar = document.getElementById('btn-agregar-producto');
+            const btnCerrar = document.getElementById('cerrar-modal');
+            const btnCancelar = document.getElementById('cancelar');
+
+            function abrirModal() {
+                if (modal) modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function cerrarModal() {
+                if (modal) modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+
+            if (btnAgregar) btnAgregar.addEventListener('click', abrirModal);
+            if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal);
+            if (btnCancelar) btnCancelar.addEventListener('click', cerrarModal);
+            if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
+        });
+    </script>
+</body>
+</html>

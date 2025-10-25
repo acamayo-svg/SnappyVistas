@@ -1,0 +1,153 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    line-height: 1.4;
+}
+
+/* Header */
+.header {
+    background-color: #e53e3e;
+    padding: 15px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 60px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    position: relative;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.logo {
+    height: 30px;
+}
+
+.location {
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+}
+
+.status-dot.online {
+    background-color: #10b981;
+}
+
+.status-dot.offline {
+    background-color: #ef4444;
+}
+
+.status-text {
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px 10px;
+    border-radius: 15px;
+}
+
+.user-icon {
+    font-size: 16px;
+}
+
+.user-text {
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.logout-btn {
+    background: white;
+    border: none;
+    color: #e53e3e;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: #f8f9fa;
+    transform: translateY(-1px);
+}
+
+/* Main Content */
+.main-content {
+    padding: 20px;
+    min-height: calc(100vh - 60px);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.icono-locacion {
+  height: 17px;
+  width: auto;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-content {
+        gap: 10px;
+    }
+    
+    .controls {
+        gap: 10px;
+    }
+    
+    .user-text {
+        display: none;
+    }
+    
+    .status-text {
+        display: none;
+    }
+}

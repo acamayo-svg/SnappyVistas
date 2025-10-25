@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snappy - Inicio</title>
+    <link rel="stylesheet" href="indexPrincipal.css">
+    <script type="module" src="../js/SistemaIntegracion.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <span class="location">Popayán</span>
+            <div class="logo-container">
+                <img src="imagenes/logo-snappy.png" alt="Logo" class="logo">
+            </div>
+            <div class="welcome-text">Bienvenido a Snappy</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="buttons-container">
+            <div class="card" onclick="irACliente()">
+                <div class="card-icon">
+                    <img src="imagenes/icono-compras.png" alt="Compras" class="card-icon">
+                </div>
+                <div class="card-text">CLIENTE</div>
+            </div>
+
+            <div class="card" onclick="irAEstablecimiento()">
+                <div class="card-icon">
+                    <img src="imagenes/icono-local.png" alt="Compras" class="card-icon">
+                </div>
+                <div class="card-text">ESTABLECIMIENTO</div>
+            </div>
+
+            <div class="card" onclick="irADomiciliario()">
+                <div class="card-icon">
+                    <img src="imagenes/icono-repartidor.png" alt="Compras" class="card-icon">
+                </div>
+                <div class="card-text">DOMICILIARIO</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Definir funciones de navegación directamente
+        function irACliente() {
+            console.log('=== NAVEGACIÓN: Redirigiendo a Cliente ===');
+            
+            // Guardar tipo de usuario en localStorage
+            localStorage.setItem('snappy_tipo_usuario', 'CLIENTE');
+            
+            // Redirigir a la página del cliente
+            window.location.href = 'Cliente/indexCliente.html';
+        }
+
+        function irAEstablecimiento() {
+            console.log('=== NAVEGACIÓN: Redirigiendo a Establecimiento ===');
+            
+            // Guardar tipo de usuario en localStorage
+            localStorage.setItem('snappy_tipo_usuario', 'ESTABLECIMIENTO');
+            
+            // Redirigir a la página del establecimiento
+            window.location.href = 'Establecimiento/indexEstablecimiento.html';
+        }
+
+        function irADomiciliario() {
+            console.log('=== NAVEGACIÓN: Redirigiendo a Domiciliario ===');
+            
+            // Guardar tipo de usuario en localStorage
+            localStorage.setItem('snappy_tipo_usuario', 'DOMICILIARIO');
+            
+            // Redirigir a la página del domiciliario
+            window.location.href = 'Domiciliario/indexDomiciliario.html';
+        }
+
+        // Log de información al cargar la página
+        console.log('=== PÁGINA PRINCIPAL CARGADA ===');
+        console.log('Tipo de usuario actual:', localStorage.getItem('snappy_tipo_usuario'));
+    </script>
+</body>
+</html>
